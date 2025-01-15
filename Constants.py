@@ -107,7 +107,7 @@ class DriveConstants:
     kPhysicalMaxSpeedMetersPerSecond = 4.6
     kPhysicalMaxAngularSpeedRadiansPerSecond = 2 * 2 * math.pi
 
-    kTeleDriveMaxSpeedMetersPerSecond = kPhysicalMaxSpeedMetersPerSecond/4
+    kTeleDriveMaxSpeedMetersPerSecond = kPhysicalMaxSpeedMetersPerSecond / 4
     kTeleDriveMaxAngularSpeedRadiansPerSecond = (
         kPhysicalMaxAngularSpeedRadiansPerSecond / 4
     )
@@ -116,7 +116,7 @@ class DriveConstants:
 
 
 class AutoConstants:
-    kMaxSpeedMetersPerSecond = DriveConstants.kPhysicalMaxSpeedMetersPerSecond/4
+    kMaxSpeedMetersPerSecond = DriveConstants.kPhysicalMaxSpeedMetersPerSecond / 4
     kMaxAngularSpeedRadiansPerSecond = (
         DriveConstants.kPhysicalMaxAngularSpeedRadiansPerSecond / 10
     )

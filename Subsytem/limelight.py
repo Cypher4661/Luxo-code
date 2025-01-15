@@ -5,6 +5,7 @@ from Constants import LimeLightConstants
 import math
 from ntcore import NetworkTable
 
+
 class limelight(Subsystem):
     def __init__(self) -> None:
         self.light_left = NetworkTableInstance.getDefault().getTable(
@@ -38,9 +39,9 @@ class limelight(Subsystem):
     def get_left_limelight(self) -> NetworkTable:
         return self.light_left
 
-    def get_target_position(self, light:NetworkTable) -> Tuple:
-        april_pose = light.getNumberArray("camerapose_targetspace", [999]*6)
+    def get_target_position(self, light: NetworkTable) -> Tuple:
+        april_pose = light.getNumberArray("camerapose_targetspace", [999] * 6)
         x = april_pose[0]
         y = april_pose[2]
         yaw = april_pose[4]
-        return (x,y,yaw)
+        return (x, y, yaw)

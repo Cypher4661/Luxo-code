@@ -2,10 +2,10 @@ from wpimath import filter
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 from wpimath.kinematics import SwerveDrive4Kinematics, ChassisSpeeds
 from commands2 import Subsystem
-#from wpimath.estimator import SwerveDrive4PoseEstimator
+
+# from wpimath.estimator import SwerveDrive4PoseEstimator
 from wpimath.kinematics import SwerveDrive4Odometry
 from Constants import DriveConstants, OIConstants, ModuleConstants
-#from wpimath.geometry import Rotation2d
 from Subsytem.SwerveModule import SwerveModule
 from navx import AHRS
 from pathplannerlib.config import (
@@ -105,12 +105,12 @@ class SwerveSubsystem(Subsystem):
                 1,
             ),
             [
-                Translation2d(75.5/2,75.5/2),
-                Translation2d(75.5/2,75.5/2),
-                Translation2d(75.5/2,75.5/2),
-                Translation2d(75.5/2,75.5/2)
+                Translation2d(75.5 / 2, 75.5 / 2),
+                Translation2d(75.5 / 2, 75.5 / 2),
+                Translation2d(75.5 / 2, 75.5 / 2),
+                Translation2d(75.5 / 2, 75.5 / 2),
             ],
-            DriveConstants.kTrackWidth
+            DriveConstants.kTrackWidth,
         )
         AutoBuilder.configure(
             self.getPose,  # Robot pose supplier

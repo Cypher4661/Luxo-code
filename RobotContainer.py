@@ -1,4 +1,5 @@
-from commands2 import Command, SequentialCommandGroup
+from commands2 import Command
+from pathplannerlib.pathfinders import Translation2d
 from Constants import (
     OIConstants,
 )
@@ -69,7 +70,9 @@ class RobotContainer:
             commands2.cmd.runOnce(lambda: self.swerveSubsystem.check_module_angle())
         )
 
-        self.driverController.a().toggleOnTrue(SlowSwerveDriveCommand(self.swerveSubsystem, self.driverController))
+        self.driverController.a().toggleOnTrue(
+            SlowSwerveDriveCommand(self.swerveSubsystem, self.driverController)
+        )
 
     def getYellowLEDCommand(self):
         return self.led_command_yellow
@@ -93,32 +96,35 @@ class RobotContainer:
         path_follower_command: Command = AutoBuilder.followPath(path)
         return path_follower_command
 
-    def get_autonomous_command(self) -> Command:
+    def get_autonomous_command(self):
         bezierPoints = PathPlannerPath.waypointsFromPoses(
             [
-                Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-                Pose2d(0, 1, Rotation2d.fromDegrees(0)),
+                Pose2d(Translation2d(0, 0), Rotation2d.fromDegrees(0)),
+                Pose2d(Translation2d(0, 1), Rotation2d.fromDegrees(0)),
             ]
         )
-        path_follower_command = self.create_path_command(
-            bezierPoints, GoalEndState(0, Rotation2d.fromDegrees(0))
+        goalEndState = GoalEndState(0, Rotation2d.fromDegrees(0))
+        path = PathPlannerPath(
+            bezierPoints,
+            PathConstraints(3.0, 3.0, 2 * math.pi, 4 * math.pi),
+            None,
+            goalEndState,
+            [],
         )
-        command_group = SequentialCommandGroup()
-        command_group.addCommands(path_follower_command)
-        return command_group
+        path_follower_command: Command = AutoBuilder.followPath(path)
+        path_follower_command.schedule()
 
     def april_tag_path(self) -> Command:
         april_light = self.limelight.get_left_limelight()
         april_pose = self.limelight.get_target_position(april_light)
-        self.swerveSubsystem.resetOdometry(Pose2d(0,0, Rotation2d(0)))
+        self.swerveSubsystem.resetOdometry(Pose2d(0, 0, Rotation2d.fromDegrees(0)))
         bezirePoints = PathPlannerPath.waypointsFromPoses(
             [
-                Pose2d(0,0,Rotation2d.fromDegrees(0)),
-                Pose2d(april_pose[0], april_pose[1], april_pose[2])
+                Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+                Pose2d(april_pose[0], april_pose[1], april_pose[2]),
             ]
         )
         path_follower_command = self.create_path_command(
-            bezirePoints,
-            GoalEndState(0, Rotation2d(april_pose[2]))
+            bezirePoints, GoalEndState(0, Rotation2d.fromDegrees(april_pose[2]))
         )
         return path_follower_command

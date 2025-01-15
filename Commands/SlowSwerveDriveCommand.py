@@ -3,6 +3,7 @@ from Subsytem.SwerveSubsystem import SwerveSubsystem
 from commands2.button import CommandXboxController
 import Constants
 
+
 class SlowSwerveDriveCommand(Command):
     def __init__(self, subsys: SwerveSubsystem, controller: CommandXboxController):
         super().__init__()
@@ -15,9 +16,9 @@ class SlowSwerveDriveCommand(Command):
 
     def execute(self):
         self.subsys.drive(
-            -self.controller.getLeftY()*Constants.DriveConstants.slowDriveMultiplier,
-            -self.controller.getLeftX()*Constants.DriveConstants.slowDriveMultiplier,
-            self.controller.getRightX()*Constants.DriveConstants.slowDriveMultiplier,
+            -self.controller.getLeftY() * Constants.DriveConstants.slowDriveMultiplier,
+            -self.controller.getLeftX() * Constants.DriveConstants.slowDriveMultiplier,
+            self.controller.getRightX() * Constants.DriveConstants.slowDriveMultiplier,
         )
         return super().execute()
 
