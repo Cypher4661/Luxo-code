@@ -7,8 +7,6 @@ from Constants import (
     ModuleConstants,
     DriveConstants,
 )
-
-import Constants
 from util.onboard_module_state import OnboardModuleState
 
 
@@ -139,16 +137,13 @@ class SwerveModule:
         ):
             self.driveMotor.set(0)
         elif is_open_loop:
-            percent_output = (
-                desired_state.speed
-                / Constants.DriveConstants.kTeleDriveMaxSpeedMetersPerSecond
-            )
-            percent_output = max(min(percent_output, 1), -1)
+            percent_output = desired_state.speed
+            percent_output = pow(percent_output, 2)*(abs(percent_output)/percent_output)
+            if abs(percent_output) >= 1:
+                percent_output = abs(percent_output)/percent_output
             self.driveMotor.set(percent_output)
         else:
             self.drive_controller.setReference(
                 desired_state.speed,
                 SparkLowLevel.ControlType.kVelocity,
-                0,
-                self.feed_forward.calculate(desired_state.speed),
             )

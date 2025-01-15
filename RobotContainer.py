@@ -30,6 +30,8 @@ class RobotContainer:
         self.led_subsys = ledSubsys()
         self.swerveSubsystem = SwerveSubsystem()
         self.limelight = limelight()
+        self.left = self.limelight.get_left_limelight()
+        self.right = self.limelight.get_right_limelight()
         self.driverController = commands2.button.CommandXboxController(
             OIConstants.kDriverControllerPort
         )
@@ -104,3 +106,19 @@ class RobotContainer:
         command_group = SequentialCommandGroup()
         command_group.addCommands(path_follower_command)
         return command_group
+
+    def april_tag_path(self) -> Command:
+        april_light = self.limelight.get_left_limelight()
+        april_pose = self.limelight.get_target_position(april_light)
+        self.swerveSubsystem.resetOdometry(Pose2d(0,0, Rotation2d(0)))
+        bezirePoints = PathPlannerPath.waypointsFromPoses(
+            [
+                Pose2d(0,0,Rotation2d.fromDegrees(0)),
+                Pose2d(april_pose[0], april_pose[1], april_pose[2])
+            ]
+        )
+        path_follower_command = self.create_path_command(
+            bezirePoints,
+            GoalEndState(0, Rotation2d(april_pose[2]))
+        )
+        return path_follower_command

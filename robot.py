@@ -30,6 +30,9 @@ class MyRobot(commands2.TimedCommandRobot):
         if self.auto_command is not None:
             self.auto_command.cancel()
 
+    def teleopPeriodic(self) -> None:
+        return super().teleopPeriodic()
+
     def disabledInit(self) -> None:
         self.container.getRedLEDCommand().schedule()
         return super().disabledInit()
