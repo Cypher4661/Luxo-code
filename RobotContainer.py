@@ -5,6 +5,7 @@ from Constants import (
 from Subsytem.SwerveSubsystem import SwerveSubsystem
 from Subsytem.LEDSubsys import ledSubsys
 from Commands.LEDCommand import ledCommand
+from Commands.SlowSwerveDriveCommand import SlowSwerveDriveCommand
 from Commands.SwerveDriveCommand import SwerveDriveCommand
 from Commands.LEDAnimationComand import LEDAnimationCommand
 import commands2
@@ -68,8 +69,7 @@ class RobotContainer:
             commands2.cmd.runOnce(lambda: self.swerveSubsystem.check_module_angle())
         )
 
-        self.driverController.a().toggleOnTrue(self.led_animmation_command)
-        self.driverController.a().toggleOnFalse(self.led_command_yellow)
+        self.driverController.a().toggleOnTrue(SlowSwerveDriveCommand(self.swerveSubsystem, self.driverController))
 
     def getYellowLEDCommand(self):
         return self.led_command_yellow

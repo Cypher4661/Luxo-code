@@ -51,8 +51,8 @@ class ModuleConstants:
 
 
 class DriveConstants:
+    slowDriveMultiplier = 0.4
     # Chassis
-
     kTrackWidth = 0.75
     kWheelBase = 0.75
     kDriveKinematics = SwerveDrive4Kinematics(
@@ -71,7 +71,7 @@ class DriveConstants:
     kFrontLeftDriveMotorPort = 2
     kFrontLeftTurningMotorPort = 1
     kFrontLeftTurningEncoderReversed = True
-    kFrontLeftDriveEncoderReversed = False
+    kFrontLeftDriveEncoderReversed = True
     kFrontLeftDriveAbsoluteEncoderPort = 9
     kFrontLeftDriveAbsoluteEncoderReversed = False
     kFrontLeftDriveAbsoluteEncoderOffset = 356.22072
@@ -80,7 +80,7 @@ class DriveConstants:
     kFrontRightDriveMotorPort = 7
     kFrontRightTurningMotorPort = 8
     kFrontRightTurningEncoderReversed = True
-    kFrontRightDriveEncoderReversed = False
+    kFrontRightDriveEncoderReversed = True
     kFrontRightDriveAbsoluteEncoderPort = 10
     kFrontRightDriveAbsoluteEncoderReversed = False
     kFrontRightDriveAbsoluteEncoderOffset = 6.6798
