@@ -13,18 +13,18 @@ robotpy_version = "2025.2.1.0"
 robotpy_extras = [
 	#"all",
 	#"apriltag",
-	#"commands2",
-	#"cscore",
-	#"navx",
-	#"pathplannerlib",
+	"commands2",
+	"cscore",
+	"navx",
+	"pathplannerlib",
 	#"phoenix5",
-	#"phoenix6",
+	"phoenix6",
 	#"playingwithfusion",
-	#"rev",
+	"rev",
 	#"romi",
 	#"sim",
 	#"xrp",
 ]
 
 # Other pip packages to install
-requires = []
+requires = ['numpy']
