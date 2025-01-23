@@ -30,18 +30,19 @@ class RobotContainer:
         self.led_bool_enable = True
         self.led_bool_disable = True
         self.led_subsys = ledSubsys()
-        self.swerveSubsystem = SwerveSubsystem()
-        self.limelight = limelight()
-        self.left = self.limelight.get_left_limelight()
-        self.right = self.limelight.get_right_limelight()
         self.driverController = commands2.button.CommandXboxController(
             OIConstants.kDriverControllerPort
         )
+        self.swerveSubsystem = SwerveSubsystem()
+        self.swerveCommand = SwerveDriveCommand(self.swerveSubsystem, self.driverController)
+        self.limelight = limelight()
+        self.left = self.limelight.get_left_limelight()
+        self.right = self.limelight.get_right_limelight()
         self.operatorController = commands2.button.CommandXboxController(
             OIConstants.kOperatorControllerPort
         )
         self.swerveSubsystem.setDefaultCommand(
-            SwerveDriveCommand(self.swerveSubsystem, self.driverController)
+            self.swerveCommand
         )
 
         self.led_command_green = ledCommand(self.led_subsys, [0, 255, 0])
@@ -108,9 +109,9 @@ class RobotContainer:
             bezierPoints,
             PathConstraints(3.0, 3.0, 2 * math.pi, 4 * math.pi),
             None,
-            goalEndState,
-            [],
+            goalEndState
         )
+
         path_follower_command: Command = AutoBuilder.followPath(path)
         path_follower_command.schedule()
 

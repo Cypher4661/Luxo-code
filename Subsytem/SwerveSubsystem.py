@@ -102,7 +102,7 @@ class SwerveSubsystem(Subsystem):
                     DriveConstants.kPhysicalMaxAngularSpeedRadiansPerSecond,
                 ),
                 40.0,
-                1,
+                1
             ),
             [
                 Translation2d(75.5 / 2, 75.5 / 2),
@@ -123,7 +123,7 @@ class SwerveSubsystem(Subsystem):
             ),
             config,
             self.shouldFlipPath,
-            self,
+            self
         )
 
     def shouldFlipPath(self):
@@ -198,12 +198,13 @@ class SwerveSubsystem(Subsystem):
         )
         self.setModuleStates(moduleState)
 
-    def autoDrive(self, speed: ChassisSpeeds) -> None:
+    def autoDrive(self, speed: ChassisSpeeds, feedforward=None) -> None:
         temp = ChassisSpeeds.fromRobotRelativeSpeeds(speed, self.getRotation2d())
         moduleState = DriveConstants.kDriveKinematics.toSwerveModuleStates(
             temp, Translation2d()
         )
         self.setModuleStates(moduleState)
+
 
     def getCSpeed(self) -> ChassisSpeeds:
         module_states = (

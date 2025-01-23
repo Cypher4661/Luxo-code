@@ -7,7 +7,7 @@ class SwerveDriveCommand(Command):
     def __init__(self, subsys: SwerveSubsystem, controller: CommandXboxController):
         super().__init__()
         self.subsys = subsys
-        self.addRequirements(self.subsys)
+        self.addRequirements(subsys)
         self.controller = controller
 
     def initialize(self):
