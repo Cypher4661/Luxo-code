@@ -3,8 +3,7 @@ from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 from wpimath.kinematics import SwerveDrive4Kinematics, ChassisSpeeds
 from commands2 import Subsystem
 
-# from wpimath.estimator import SwerveDrive4PoseEstimator
-from wpimath.kinematics import SwerveDrive4Odometry
+from wpimath.estimator import SwerveDrive4PoseEstimator
 from Constants import DriveConstants, OIConstants, ModuleConstants
 from Subsytem.SwerveModule import SwerveModule
 from navx import AHRS
@@ -76,7 +75,7 @@ class SwerveSubsystem(Subsystem):
             DriveConstants.kBackRightDriveAbsoluteEncoderOffset,
             DriveConstants.kBackRightDriveAbsoluteEncoderReversed,
         )
-        self.odometer = SwerveDrive4Odometry(
+        self.odometer = SwerveDrive4PoseEstimator(
             DriveConstants.kDriveKinematics,
             self.getRotation2d(),
             (
@@ -88,8 +87,8 @@ class SwerveSubsystem(Subsystem):
             Pose2d(0, 0, Rotation2d(0)),
         )
         config = RobotConfig(
-            30.0,
-            15.0,
+            20.0,
+            1.875,
             ModuleConfig(
                 ModuleConstants.kWheelDiameterMeters,
                 DriveConstants.kPhysicalMaxSpeedMetersPerSecond,
@@ -102,7 +101,7 @@ class SwerveSubsystem(Subsystem):
                     DriveConstants.kPhysicalMaxAngularSpeedRadiansPerSecond,
                 ),
                 40.0,
-                1
+                1,
             ),
             [
                 Translation2d(75.5 / 2, 75.5 / 2),
@@ -116,14 +115,14 @@ class SwerveSubsystem(Subsystem):
             self.getPose,  # Robot pose supplier
             self.resetOdometry,  # Method to reset odometry (will be called if your auto has a starting pose)
             self.getCSpeed,  # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            lambda speed, feedforward: self.autoDrive(speed),
+            lambda speed, feedforward: self.autoDrive(speed, feedforward),
             PPHolonomicDriveController(  # HolonomicPathFollowerConfig, this should likely live in your Constants class
-                PIDConstants(5, 0.0, 0.0),  # Translation PID constants
-                PIDConstants(5, 0.0, 0.0),  # Rotation PID constants
+                PIDConstants(0.5, 0, 0.2),  # Translation PID constants
+                PIDConstants(0.5, 0, 0.1),  # Rotation PID constants
             ),
             config,
             self.shouldFlipPath,
-            self
+            self,
         )
 
     def shouldFlipPath(self):
@@ -149,7 +148,7 @@ class SwerveSubsystem(Subsystem):
         return Rotation2d.fromDegrees(self.getHeading())
 
     def getPose(self) -> Pose2d:
-        return self.odometer.getPose()
+        return self.odometer.getEstimatedPosition()
 
     def resetOdometry(self, pose: Pose2d) -> None:
         module_positions = (
@@ -204,7 +203,6 @@ class SwerveSubsystem(Subsystem):
             temp, Translation2d()
         )
         self.setModuleStates(moduleState)
-
 
     def getCSpeed(self) -> ChassisSpeeds:
         module_states = (

@@ -1,5 +1,4 @@
 from commands2 import Command
-from pathplannerlib.pathfinders import Translation2d
 from Constants import (
     OIConstants,
 )
@@ -23,7 +22,6 @@ from pathplannerlib.auto import AutoBuilder
 from Subsytem.limelight import limelight
 from wpimath.geometry import Pose2d, Rotation2d
 import math
-import pathplannerlib.trajectory
 
 class RobotContainer:
     def __init__(self):
@@ -92,16 +90,17 @@ class RobotContainer:
             PathConstraints(3.0, 3.0, 2 * math.pi, 4 * math.pi),
             None,
             goalEndState,
-            rotaionTargets,
         )
         path_follower_command: Command = AutoBuilder.followPath(path)
         return path_follower_command
 
     def get_autonomous_command(self) -> Command:
+        self.swerveSubsystem.resetOdometry(Pose2d(0,0,Rotation2d.fromDegrees(0)))
+        self.swerveSubsystem.zeroHeading()
         bezierPoints = PathPlannerPath.waypointsFromPoses(
             [
-                Pose2d(Translation2d(0, 0), Rotation2d.fromDegrees(0)),
-                Pose2d(Translation2d(0, 1), Rotation2d.fromDegrees(0)),
+                Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+                Pose2d(0.5, 0, Rotation2d.fromDegrees(0)),
             ]
         )
         goalEndState = GoalEndState(0.0, Rotation2d.fromDegrees(0))
