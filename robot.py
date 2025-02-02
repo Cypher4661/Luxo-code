@@ -17,15 +17,16 @@ class MyRobot(commands2.TimedCommandRobot):
 
     # autonomus
     def autonomousInit(self) -> None:
-        auto_command = self.container.get_autonomous_command()
-        if auto_command != None:
-            auto_command.schedule()
+        self.auto_command = self.container.get_autonomous_command()
+        if self.auto_command != None:
+            self.auto_command.schedule()
 
     def autonomousPeriodic(self) -> None:
-        pass
+        self.auto_command.cancel()
 
     # teleoperated
     def teleopInit(self) -> None:
+
         pass
 
     def teleopPeriodic(self) -> None:

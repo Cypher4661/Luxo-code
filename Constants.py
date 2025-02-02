@@ -2,7 +2,49 @@ from wpimath.kinematics import SwerveDrive4Kinematics
 from wpimath.geometry import Translation2d
 import math
 from wpimath.trajectory import TrapezoidProfileRadians
+from rev import SparkMax
 
+class AlgiIntake:
+    pass
+
+class CorralIntake:
+    pass
+
+class CoralSubsys:
+    motor_id = 1
+    deadBand = 1#degrees
+    maxVolts = 12
+    maxAmper = 40
+    rampUp = 0.1
+    gearRatio = 80
+    limit_id = 1
+    kp = 4.8
+    ki = 0
+    kd = 0.1
+    kf = 0
+    ks = 0.1
+    kv = 0.12
+    ka = 0.1
+    velocity = 80
+    acceleration = 160
+    jerk = 1600
+
+class AlgiSubsys:
+    deadband = 1 #degrees
+    motor1_id = 9
+    motor2_id = 10
+    limit_id = 0
+    motor1_type = SparkMax.MotorType.kBrushless
+    motor2_type = SparkMax.MotorType.kBrushless
+    gear_ratio = 20
+    convertion_factor = 360/gear_ratio
+    kp = 0
+    ki = 0
+    kd = 0
+    kf = 0
+    maxVelocity = 0
+    minVelocity = 0
+    maxAcceleration = 0
 
 class led:
     led_port = 0

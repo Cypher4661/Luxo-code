@@ -24,6 +24,7 @@ class SwerveSubsystem(Subsystem):
             0, 0, 0, Rotation2d.fromDegrees(0)
         )
         self.special_drive = False
+
         self.gyro = AHRS.create_spi()
 
         self.xLimiter = filter.SlewRateLimiter(
@@ -142,7 +143,7 @@ class SwerveSubsystem(Subsystem):
 
     def getHeading(self) -> float:
         angle = self.gyro.getYaw() % 360
-        return 360 - angle
+        return 360-angle
 
     def getRotation2d(self) -> Rotation2d:
         return Rotation2d.fromDegrees(self.getHeading())
@@ -183,14 +184,9 @@ class SwerveSubsystem(Subsystem):
         xSpeed = xSpeed if abs(xSpeed) > OIConstants.kStickDriftLX else 0.0
         ySpeed = ySpeed if abs(ySpeed) > OIConstants.kStickDriftLY else 0.0
         tSpeed = tSpeed if abs(tSpeed) > OIConstants.kStickDriftRX else 0.0
+        cSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, tSpeed, self.getRotation2d())
 
-        cSpeed: ChassisSpeeds
-        if fieldOriented:
-            cSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(
-                xSpeed, ySpeed, tSpeed, self.getRotation2d()
-            )
-        else:
-            cSpeed = ChassisSpeeds(xSpeed, ySpeed, tSpeed)
+        print(self.getHeading())
 
         moduleState = DriveConstants.kDriveKinematics.toSwerveModuleStates(
             cSpeed, Translation2d()
