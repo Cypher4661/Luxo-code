@@ -143,7 +143,7 @@ class SwerveSubsystem(Subsystem):
 
     def getHeading(self) -> float:
         angle = self.gyro.getYaw() % 360
-        return 360-angle
+        return 360 - angle
 
     def getRotation2d(self) -> Rotation2d:
         return Rotation2d.fromDegrees(self.getHeading())
@@ -184,7 +184,9 @@ class SwerveSubsystem(Subsystem):
         xSpeed = xSpeed if abs(xSpeed) > OIConstants.kStickDriftLX else 0.0
         ySpeed = ySpeed if abs(ySpeed) > OIConstants.kStickDriftLY else 0.0
         tSpeed = tSpeed if abs(tSpeed) > OIConstants.kStickDriftRX else 0.0
-        cSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, tSpeed, self.getRotation2d())
+        cSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(
+            xSpeed, ySpeed, tSpeed, self.getRotation2d()
+        )
 
         print(self.getHeading())
 

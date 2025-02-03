@@ -4,15 +4,26 @@ import math
 from wpimath.trajectory import TrapezoidProfileRadians
 from rev import SparkMax
 
+
 class AlgiIntake:
-    pass
+    motor_id = 3
+    maxAmper = 30
+    maxVolts = 6
+    rampUp = 0.1
+    limit_id = 2
+
 
 class CorralIntake:
-    pass
+    motor_id = 4
+    maxAmper = 30
+    maxVolts = 6
+    rampUp = 0.1
+    limit_id = 3
+
 
 class CoralSubsys:
     motor_id = 1
-    deadBand = 1#degrees
+    deadBand = 1  # degrees
     maxVolts = 12
     maxAmper = 40
     rampUp = 0.1
@@ -29,15 +40,16 @@ class CoralSubsys:
     acceleration = 160
     jerk = 1600
 
+
 class AlgiSubsys:
-    deadband = 1 #degrees
+    deadband = 1  # degrees
     motor1_id = 9
     motor2_id = 10
     limit_id = 0
     motor1_type = SparkMax.MotorType.kBrushless
     motor2_type = SparkMax.MotorType.kBrushless
     gear_ratio = 20
-    convertion_factor = 360/gear_ratio
+    convertion_factor = 360 / gear_ratio
     kp = 0
     ki = 0
     kd = 0
@@ -45,6 +57,7 @@ class AlgiSubsys:
     maxVelocity = 0
     minVelocity = 0
     maxAcceleration = 0
+
 
 class led:
     led_port = 0

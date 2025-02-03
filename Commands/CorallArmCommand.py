@@ -2,8 +2,9 @@ from commands2 import Command
 from Subsytem.CorallArmSubsy import corralArmSubsys
 from Constants import CoralSubsys
 
+
 class corralArmCommand(Command):
-    def __init__(self, subsys:corralArmSubsys, angle:float):
+    def __init__(self, subsys: corralArmSubsys, angle: float):
         self.angle = angle
         self.subsys = subsys
         self.addRequirements(subsys)
@@ -18,7 +19,7 @@ class corralArmCommand(Command):
         return super().execute()
 
     def isFinished(self) -> bool:
-        return (abs(self.angle-self.subsys.get_current_angle()) <= CoralSubsys.deadBand)
+        return abs(self.angle - self.subsys.get_current_angle()) <= CoralSubsys.deadBand
         return super().isFinished()
 
     def end(self, interrupted: bool):

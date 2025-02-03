@@ -26,7 +26,6 @@ class MyRobot(commands2.TimedCommandRobot):
 
     # teleoperated
     def teleopInit(self) -> None:
-
         pass
 
     def teleopPeriodic(self) -> None:

@@ -27,6 +27,7 @@ from Subsytem.AlgiArmSubsys import algiArmSubsys
 from wpimath.geometry import Pose2d, Rotation2d
 import math
 
+
 class RobotContainer:
     def __init__(self):
         self.led_bool_enable = True
@@ -42,22 +43,18 @@ class RobotContainer:
         self.algiArmSubsystem = algiArmSubsys()
         self.defaultAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 0)
         self.algiArmCommand = algiArmCommand(self.algiArmSubsystem, 30)
-        self.swerveCommand = SwerveDriveCommand(self.swerveSubsystem, self.driverController)
+        self.swerveCommand = SwerveDriveCommand(
+            self.swerveSubsystem, self.driverController
+        )
         self.limelight = limelight()
         self.left = self.limelight.get_left_limelight()
         self.right = self.limelight.get_right_limelight()
         self.operatorController = commands2.button.CommandXboxController(
             OIConstants.kOperatorControllerPort
         )
-        self.swerveSubsystem.setDefaultCommand(
-            self.swerveCommand
-        )
-        self.algiArmSubsystem.setDefaultCommand(
-            self.defaultAlgiArmCommand
-        )
-        self.corralArmSubsystem.setDefaultCommand(
-            self.defaultCorralArmCommand
-        )
+        self.swerveSubsystem.setDefaultCommand(self.swerveCommand)
+        self.algiArmSubsystem.setDefaultCommand(self.defaultAlgiArmCommand)
+        self.corralArmSubsystem.setDefaultCommand(self.defaultCorralArmCommand)
 
         self.led_command_green = ledCommand(self.led_subsys, [0, 255, 0])
         self.led_command_blue = ledCommand(self.led_subsys, [0, 0, 255])
@@ -82,13 +79,9 @@ class RobotContainer:
             SlowSwerveDriveCommand(self.swerveSubsystem, self.driverController)
         )
 
-        self.operatorController.b().toggleOnTrue(
-            self.algiArmCommand
-        )
+        self.operatorController.b().toggleOnTrue(self.algiArmCommand)
 
-        self.operatorController.a().toggleOnTrue(
-            self.corralArmCommand
-        )
+        self.operatorController.a().toggleOnTrue(self.corralArmCommand)
 
     def getYellowLEDCommand(self):
         return self.led_command_yellow
@@ -112,7 +105,7 @@ class RobotContainer:
         return path_follower_command
 
     def get_autonomous_command(self) -> Command:
-        self.swerveSubsystem.resetOdometry(Pose2d(0,0,Rotation2d.fromDegrees(0)))
+        self.swerveSubsystem.resetOdometry(Pose2d(0, 0, Rotation2d.fromDegrees(0)))
         self.swerveSubsystem.zeroHeading()
         bezierPoints = PathPlannerPath.waypointsFromPoses(
             [
