@@ -14,7 +14,7 @@ class corralIntake(Subsystem):
             phoenix6.hardware.TalonFX(CorralIntake.motor_id, ""), True
         )
         self.controller = phoenix6.controls.DutyCycleOut(0)
-        self.limit = wpilib.DigitalInput(0)
+        self.limit = wpilib.DigitalInput(CorralIntake.limit_id)
 
     def config_motor(
         self, motor: phoenix6.hardware.TalonFX, inverted: bool
