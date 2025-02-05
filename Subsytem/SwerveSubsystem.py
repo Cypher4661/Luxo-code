@@ -188,8 +188,6 @@ class SwerveSubsystem(Subsystem):
             xSpeed, ySpeed, tSpeed, self.getRotation2d()
         )
 
-        print(self.getHeading())
-
         moduleState = DriveConstants.kDriveKinematics.toSwerveModuleStates(
             cSpeed, Translation2d()
         )

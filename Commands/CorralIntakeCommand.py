@@ -1,8 +1,9 @@
 from commands2 import Command
 from Subsytem.CorralIntake import corralIntake
 
+
 class corralIntakeCommand(Command):
-    def __init__(self, subsys:corralIntake, power:float):
+    def __init__(self, subsys: corralIntake, power: float):
         self.power = power
         self.subsys = subsys
         self.addRequirements(subsys)

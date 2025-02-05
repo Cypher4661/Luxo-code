@@ -6,7 +6,7 @@ from rev import SparkMax
 
 
 class AlgiIntake:
-    motor_id = 3
+    motor_id = 33
     maxAmper = 30
     maxVolts = 6
     rampUp = 0.1
@@ -14,7 +14,7 @@ class AlgiIntake:
 
 
 class CorralIntake:
-    motor_id = 4
+    motor_id = 22
     maxAmper = 30
     maxVolts = 6
     rampUp = 0.1
@@ -22,45 +22,47 @@ class CorralIntake:
 
 
 class CoralSubsys:
-    motor_id = 1
+    motor_id = 21
     deadBand = 1  # degrees
     maxVolts = 12
     maxAmper = 40
     rampUp = 0.1
     gearRatio = 80
     limit_id = 1
-    kp = 4.8
+    kp = 1.5
     ki = 0
-    kd = 0.1
+    kd = 0
     kf = 0
     ks = 0.1
     kv = 0.12
     ka = 0.1
-    velocity = 80
-    acceleration = 160
-    jerk = 1600
+    velocity = 20
+    acceleration = 40
+    jerk = 80
+    revcoder = 7
 
 
 class AlgiSubsys:
     deadband = 1  # degrees
-    motor1_id = 9
-    motor2_id = 10
-    limit_id = 0
+    motor1_id = 31
+    motor2_id = 32
+    limit_id = 5 
     motor1_type = SparkMax.MotorType.kBrushless
     motor2_type = SparkMax.MotorType.kBrushless
-    gear_ratio = 20
+    gear_ratio = 60
     convertion_factor = 360 / gear_ratio
-    kp = 0
+    kp = 1 
     ki = 0
     kd = 0
     kf = 0
-    maxVelocity = 0
-    minVelocity = 0
-    maxAcceleration = 0
+    maxVelocity = 20
+    minVelocity = 15
+    maxAcceleration = 40
+    revcoder = 2
 
 
 class led:
-    led_port = 0
+    led_port = 4
     led_length = 120
 
 

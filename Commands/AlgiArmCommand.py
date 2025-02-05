@@ -12,6 +12,7 @@ class algiArmCommand(Command):
         super().__init__()
 
     def initialize(self):
+        self.subsys.rest_encoder()
         return super().initialize()
 
     def execute(self):

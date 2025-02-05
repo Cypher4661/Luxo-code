@@ -30,31 +30,35 @@ import math
 
 class RobotContainer:
     def __init__(self):
+        #Random Data
         self.led_bool_enable = True
         self.led_bool_disable = True
-        self.led_subsys = ledSubsys()
+ 
+        #Controllers
         self.driverController = commands2.button.CommandXboxController(
             OIConstants.kDriverControllerPort
+        ) 
+        self.operatorController = commands2.button.CommandXboxController(
+            OIConstants.kOperatorControllerPort
         )
-        self.corralArmSubsystem = corralArmSubsys()
-        self.corralArmCommand = corralArmCommand(self.corralArmSubsystem, 30)
-        self.defaultCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 0)
+
+        #Subsystems
+        self.corralArmSubsystem = corralArmSubsys() 
         self.swerveSubsystem = SwerveSubsystem()
+        self.led_subsys = ledSubsys()
+        self.limelight = limelight()
+        self.left = self.limelight.get_left_limelight()
+        self.right = self.limelight.get_right_limelight()
+
+        #Commands
+        self.coralArmCommand = corralArmCommand(self.corralArmSubsystem, 30)
+        self.defaultCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 0)
         self.algiArmSubsystem = algiArmSubsys()
         self.defaultAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 0)
         self.algiArmCommand = algiArmCommand(self.algiArmSubsystem, 30)
         self.swerveCommand = SwerveDriveCommand(
             self.swerveSubsystem, self.driverController
         )
-        self.limelight = limelight()
-        self.left = self.limelight.get_left_limelight()
-        self.right = self.limelight.get_right_limelight()
-        self.operatorController = commands2.button.CommandXboxController(
-            OIConstants.kOperatorControllerPort
-        )
-        self.swerveSubsystem.setDefaultCommand(self.swerveCommand)
-        self.algiArmSubsystem.setDefaultCommand(self.defaultAlgiArmCommand)
-        self.corralArmSubsystem.setDefaultCommand(self.defaultCorralArmCommand)
 
         self.led_command_green = ledCommand(self.led_subsys, [0, 255, 0])
         self.led_command_blue = ledCommand(self.led_subsys, [0, 0, 255])
@@ -64,10 +68,14 @@ class RobotContainer:
         )
         self.led_command_yellow = ledCommand(self.led_subsys, [255, 0, 100])
 
+        #Default Commands
+        self.swerveSubsystem.setDefaultCommand(self.swerveCommand)
+        self.algiArmSubsystem.setDefaultCommand(self.defaultAlgiArmCommand)
+        self.corralArmSubsystem.setDefaultCommand(self.defaultCorralArmCommand)
+
         self.configure_button_bindings()
 
     def configure_button_bindings(self):
-        # reset robots heading
         self.driverController.b().onTrue(
             commands2.cmd.runOnce(lambda: self.swerveSubsystem.zeroHeading())
         )
@@ -80,8 +88,7 @@ class RobotContainer:
         )
 
         self.operatorController.b().toggleOnTrue(self.algiArmCommand)
-
-        self.operatorController.a().toggleOnTrue(self.corralArmCommand)
+        self.operatorController.a().toggleOnTrue(self.coralArmCommand)
 
     def getYellowLEDCommand(self):
         return self.led_command_yellow

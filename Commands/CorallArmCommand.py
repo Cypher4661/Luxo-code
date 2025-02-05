@@ -14,14 +14,8 @@ class corralArmCommand(Command):
         return super().initialize()
 
     def execute(self):
-        self.subsys.reset_encoder()
-        self.subsys.motor_to_position(self.angle)
+        if self.subsys.at_limit() or abs(self.subsys.get_current_angle()-self.angle) <= CoralSubsys.deadBand:
+            self.subsys.stop()
+        else:
+            self.subsys.motor_to_position(self.angle)
         return super().execute()
-
-    def isFinished(self) -> bool:
-        return abs(self.angle - self.subsys.get_current_angle()) <= CoralSubsys.deadBand
-        return super().isFinished()
-
-    def end(self, interrupted: bool):
-        self.subsys.stop()
-        return super().end(interrupted)

@@ -13,9 +13,10 @@ class corralArmSubsys(Subsystem):
         super().__init__()
         self.motor = self.config_motor(TalonFX(CoralSubsys.motor_id, ""), True)
         self.controller = phoenix6.controls.MotionMagicVoltage(0)
-        self.stopController = phoenix6.controls.DutyCycleOut(0)
+        self.stopController = phoenix6.controls.VoltageOut(0)
         self.limit = wpilib.DigitalInput(CoralSubsys.limit_id)
         SmartDashboard.putData("Corral Arm Subsystem", self)
+        self.reset_encoder()
 
     def config_motor(
         self, motor: phoenix6.hardware.TalonFX, inverted: bool
@@ -62,24 +63,19 @@ class corralArmSubsys(Subsystem):
 
         motor.configurator.apply(talonConfig)
         return motor
+    
+    def periodic(self):
+        return super().periodic()
 
     def reset_encoder(self) -> None:
-        if self.at_limit:
-            self.motor.set_position(0)
+        self.motor.set_position(0)
 
     def at_limit(self) -> bool:
-        return self.limit.get()
+        return not self.limit.get()
 
-    def motor_to_position(self, angle) -> None:
-        if (
-            self.at_limit()
-            or abs(angle - self.get_current_angle()) <= CoralSubsys.deadBand
-        ):
-            self.motor.set_control(self.stopController)
-            return
-        self.motor.set_control(
-            self.controller.with_position(self.angle_to_rotation(angle))
-        )
+    def motor_to_position(self, angle:float) -> None:
+        rot = self.angle_to_rotation(angle)*CoralSubsys.gearRatio
+        self.motor.set_control(self.controller.with_position(rot))
 
     def stop(self) -> None:
         self.motor.set_control(self.stopController)
@@ -91,7 +87,8 @@ class corralArmSubsys(Subsystem):
         return angle / 360
 
     def get_current_angle(self) -> float:
-        return self.rotation_to_angle(self.motor.get_position().value_as_double)
+        angle = self.rotation_to_angle(self.motor.get_rotor_position().value_as_double)
+        return angle/CoralSubsys.gearRatio
 
     def initSendable(self, builder: SendableBuilder) -> None:
         builder.addDoubleProperty(

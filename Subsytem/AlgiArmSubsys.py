@@ -33,6 +33,7 @@ class algiArmSubsys(Subsystem):
         config.closedLoop.pidf(
             AlgiSubsys.kp, AlgiSubsys.ki, AlgiSubsys.kd, AlgiSubsys.kf
         )
+
         config.closedLoop.smartMotion.maxAcceleration(AlgiSubsys.maxAcceleration)
         config.closedLoop.smartMotion.maxVelocity(AlgiSubsys.maxVelocity)
         config.closedLoop.smartMotion.minOutputVelocity(AlgiSubsys.minVelocity)
@@ -63,12 +64,12 @@ class algiArmSubsys(Subsystem):
         ):
             self.motor1.set(0)
             self.motor2.set(0)
-            return
+            return 
         self.motor1_controller.setReference(
-            self.degrees_to_rotation(angle), rev.SparkLowLevel.ControlType.kSmartMotion
+            self.degrees_to_rotation(angle), rev.SparkLowLevel.ControlType.kPosition
         )
         self.motor2_controller.setReference(
-            self.degrees_to_rotation(angle), rev.SparkLowLevel.ControlType.kSmartMotion
+            self.degrees_to_rotation(angle), rev.SparkLowLevel.ControlType.kPosition
         )
 
     def stop(self) -> None:
