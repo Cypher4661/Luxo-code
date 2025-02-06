@@ -23,6 +23,8 @@ class algiArmSubsys(Subsystem):
         self.encoder = self.motor1.getEncoder()
 
         self.limit = wpilib.DigitalInput(AlgiSubsys.limit_id)
+        self.input = wpilib.DigitalInput(AlgiSubsys.revcoder)
+        self.absolute_encoder = wpilib.DutyCycleEncoder(self.input)
         self.rest_encoder()
         SmartDashboard.putData("Algi Arm Subsystem", self)
 
@@ -50,21 +52,15 @@ class algiArmSubsys(Subsystem):
         return motor
 
     def rest_encoder(self) -> None:
-        self.encoder.setPosition(0)
+        pose = self.absolute_encoder.get() - AlgiSubsys.encoder_offset
+        self.encoder.setPosition(pose)
         encoder = self.motor2.getEncoder()
-        encoder.setPosition(0)
+        encoder.setPosition(pose)
 
     def at_limit(self) -> bool:
-        return self.limit.get()
+        return not self.limit.get()
 
     def motor_to_position(self, angle: float) -> None:
-        if (
-            self.at_limit()
-            or abs(angle - self.get_current_degree()) <= AlgiSubsys.deadband
-        ):
-            self.motor1.set(0)
-            self.motor2.set(0)
-            return 
         self.motor1_controller.setReference(
             self.degrees_to_rotation(angle), rev.SparkLowLevel.ControlType.kPosition
         )

@@ -16,15 +16,11 @@ class algiArmCommand(Command):
         return super().initialize()
 
     def execute(self):
-        if self.subsys.at_limit():
-            self.subsys.rest_encoder()
-        self.subsys.motor_to_position(self.angle)
+        if (
+            self.subsys.at_limit()
+            or abs(self.subsys.get_current_degree() - self.angle) <= AlgiSubsys.deadband
+        ):
+            self.subsys.stop()
+        else:
+            self.subsys.motor_to_position(self.angle)
         return super().execute()
-
-    def isFinished(self) -> bool:
-        return abs(self.angle - self.subsys.get_current_degree()) <= AlgiSubsys.deadband
-        return super().isFinished()
-
-    def end(self, interrupted: bool):
-        self.subsys.stop()
-        return super().end(interrupted)

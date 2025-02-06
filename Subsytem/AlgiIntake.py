@@ -46,5 +46,11 @@ class algiIntake(Subsystem):
     def duty_motor(self, power) -> None:
         self.motor.set_control(self.controller.with_output(power))
 
+    def get_motor_velocity(self) -> None:
+        return self.motor.get_rotor_velocity().value_as_double
+
     def initSendable(self, builder: SendableBuilder) -> None:
+        builder.addDoubleProperty(
+            "Rotor Velocity", self.get_motor_velocity, lambda x: None
+        )
         return super().initSendable(builder)

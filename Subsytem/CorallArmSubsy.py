@@ -6,6 +6,7 @@ import phoenix6
 import wpilib
 from wpilib import SmartDashboard
 from wpiutil import SendableBuilder
+from wpilib import DutyCycleEncoder
 
 
 class corralArmSubsys(Subsystem):
@@ -16,6 +17,8 @@ class corralArmSubsys(Subsystem):
         self.stopController = phoenix6.controls.VoltageOut(0)
         self.limit = wpilib.DigitalInput(CoralSubsys.limit_id)
         SmartDashboard.putData("Corral Arm Subsystem", self)
+        self.encoder_input = wpilib.DigitalInput(CoralSubsys.revcoder)
+        self.absolute_encoder = DutyCycleEncoder(self.encoder_input)
         self.reset_encoder()
 
     def config_motor(
@@ -63,18 +66,19 @@ class corralArmSubsys(Subsystem):
 
         motor.configurator.apply(talonConfig)
         return motor
-    
+
     def periodic(self):
         return super().periodic()
 
     def reset_encoder(self) -> None:
-        self.motor.set_position(0)
+        pose = self.absolute_encoder.get() - CoralSubsys.encoder_offset
+        self.motor.set_position(pose)
 
     def at_limit(self) -> bool:
         return not self.limit.get()
 
-    def motor_to_position(self, angle:float) -> None:
-        rot = self.angle_to_rotation(angle)*CoralSubsys.gearRatio
+    def motor_to_position(self, angle: float) -> None:
+        rot = self.angle_to_rotation(angle) * CoralSubsys.gearRatio
         self.motor.set_control(self.controller.with_position(rot))
 
     def stop(self) -> None:
@@ -88,7 +92,7 @@ class corralArmSubsys(Subsystem):
 
     def get_current_angle(self) -> float:
         angle = self.rotation_to_angle(self.motor.get_rotor_position().value_as_double)
-        return angle/CoralSubsys.gearRatio
+        return angle / CoralSubsys.gearRatio
 
     def initSendable(self, builder: SendableBuilder) -> None:
         builder.addDoubleProperty(

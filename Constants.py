@@ -11,6 +11,7 @@ class AlgiIntake:
     maxVolts = 6
     rampUp = 0.1
     limit_id = 2
+    min_velocity = 10
 
 
 class CorralIntake:
@@ -19,6 +20,7 @@ class CorralIntake:
     maxVolts = 6
     rampUp = 0.1
     limit_id = 3
+    min_velocity = 10
 
 
 class CoralSubsys:
@@ -29,7 +31,7 @@ class CoralSubsys:
     rampUp = 0.1
     gearRatio = 80
     limit_id = 1
-    kp = 1.5
+    kp = 0.5
     ki = 0
     kd = 0
     kf = 0
@@ -40,18 +42,19 @@ class CoralSubsys:
     acceleration = 40
     jerk = 80
     revcoder = 7
+    encoder_offset = 0
 
 
 class AlgiSubsys:
     deadband = 1  # degrees
     motor1_id = 31
     motor2_id = 32
-    limit_id = 5 
+    limit_id = 5
     motor1_type = SparkMax.MotorType.kBrushless
     motor2_type = SparkMax.MotorType.kBrushless
     gear_ratio = 60
     convertion_factor = 360 / gear_ratio
-    kp = 1 
+    kp = 0.5
     ki = 0
     kd = 0
     kf = 0
@@ -59,6 +62,7 @@ class AlgiSubsys:
     minVelocity = 15
     maxAcceleration = 40
     revcoder = 2
+    encoder_offset = 0
 
 
 class led:

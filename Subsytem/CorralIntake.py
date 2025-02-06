@@ -14,7 +14,6 @@ class corralIntake(Subsystem):
             phoenix6.hardware.TalonFX(CorralIntake.motor_id, ""), True
         )
         self.controller = phoenix6.controls.DutyCycleOut(0)
-        self.limit = wpilib.DigitalInput(CorralIntake.limit_id)
 
     def config_motor(
         self, motor: phoenix6.hardware.TalonFX, inverted: bool
@@ -46,11 +45,11 @@ class corralIntake(Subsystem):
         motor.configurator.apply(talonConfig)
         return motor
 
-    def at_limit(self) -> bool:
-        return self.limit.get()
-
     def duty_motor(self, power: float) -> None:
         self.motor.set_control(self.controller.with_output(power))
+
+    def get_motor_velocity(self) -> float:
+        return self.motor.get_rotor_velocity().value_as_double
 
     def initSendable(self, builder: SendableBuilder) -> None:
         return super().initSendable(builder)

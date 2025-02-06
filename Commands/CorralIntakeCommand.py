@@ -1,5 +1,6 @@
 from commands2 import Command
 from Subsytem.CorralIntake import corralIntake
+from Constants import CorralIntake
 
 
 class corralIntakeCommand(Command):
@@ -10,16 +11,11 @@ class corralIntakeCommand(Command):
         super().__init__()
 
     def initialize(self):
-        self.subsys.duty_motor(self.power)
         return super().initialize()
 
     def execute(self):
+        if self.subsys.get_motor_velocity() <= CorralIntake.min_velocity:
+            self.subsys.duty_motor(0)
+        else:
+            self.subsys.duty_motor(self.power)
         return super().execute()
-
-    def isFinished(self) -> bool:
-        return self.subsys.at_limit()
-        return super().isFinished()
-
-    def end(self, interrupted: bool):
-        self.subsys.duty_motor(0)
-        return super().end(interrupted)

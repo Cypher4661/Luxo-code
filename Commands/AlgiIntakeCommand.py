@@ -1,5 +1,6 @@
 from commands2 import Command
 from Subsytem.AlgiIntake import algiIntake
+from Constants import AlgiIntake
 
 
 class algiIntakeCommand(Command):
@@ -10,15 +11,11 @@ class algiIntakeCommand(Command):
         super().__init__()
 
     def initialize(self):
-        self.subsys.duty_motor(self.power)
         return super().initialize()
 
     def execute(self):
+        if self.subsys.get_motor_velocity() <= AlgiIntake.min_velocity:
+            self.subsys.duty_motor(0)
+        else:
+            self.subsys.duty_motor(self.power)
         return super().execute()
-
-    def isFinished(self) -> bool:
-        return super().isFinished()
-
-    def end(self, interrupted: bool):
-        self.subsys.duty_motor(0)
-        return super().end(interrupted)
