@@ -10,6 +10,8 @@ from Commands.SlowSwerveDriveCommand import SlowSwerveDriveCommand
 from Commands.SwerveDriveCommand import SwerveDriveCommand
 from Commands.AlgiArmCommand import algiArmCommand
 from Commands.LEDAnimationComand import LEDAnimationCommand
+from Commands.AlgiIntakeCommand import algiIntakeCommand
+from Commands.CorralIntakeCommand import corralIntakeCommand
 import commands2
 import commands2.cmd
 import commands2.button
@@ -24,9 +26,12 @@ from pathplannerlib.auto import AutoBuilder
 from Subsytem.limelight import limelight
 from Subsytem.CorallArmSubsy import corralArmSubsys
 from Subsytem.AlgiArmSubsys import algiArmSubsys
+from Subsytem.AlgiIntake import algiIntake
+from Subsytem.CorralIntake import corralIntake
 from wpimath.geometry import Pose2d, Rotation2d
 import math
-
+from commands2 import SequentialCommandGroup
+from commands2 import ParallelCommandGroup
 
 class RobotContainer:
     def __init__(self):
@@ -49,17 +54,18 @@ class RobotContainer:
         self.limelight = limelight()
         self.left = self.limelight.get_left_limelight()
         self.right = self.limelight.get_right_limelight()
-
-        # Commands
-        self.coralArmCommand = corralArmCommand(self.corralArmSubsystem, 30)
-        self.defaultCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 0)
+        self.algiIntakeSubsystem = algiIntake()
+        self.corralIntakeSubsystem = corralIntake()
         self.algiArmSubsystem = algiArmSubsys()
-        self.defaultAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 0)
-        self.algiArmCommand = algiArmCommand(self.algiArmSubsystem, 30)
-        self.swerveCommand = SwerveDriveCommand(
-            self.swerveSubsystem, self.driverController
-        )
-
+        
+        # Commands
+        self.intakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, 0.5)
+        self.intakeCorralIntakeCommand = corralIntakeCommand(self.corralIntakeSubsystem, 0.5)
+        self.outputAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, -0.5)
+        self.outputCorralIntakeCommand = corralIntakeCommand(self.corralIntakeSubsystem, -0.5)
+        self.l3ArmCommand = corralArmCommand(self.corralArmSubsystem, 135,True)
+        self.intakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 0)
+        self.pickAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 45)
         self.led_command_green = ledCommand(self.led_subsys, [0, 255, 0])
         self.led_command_blue = ledCommand(self.led_subsys, [0, 0, 255])
         self.led_command_red = ledCommand(self.led_subsys, [255, 0, 0])
@@ -68,12 +74,28 @@ class RobotContainer:
         )
         self.led_command_yellow = ledCommand(self.led_subsys, [255, 0, 100])
 
-        # Default Commands
+        #Deafult Commands
+        self.deafultAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, 0, True)
+        self.deafultCorralIntakeCommand = corralIntakeCommand(self.corralIntakeSubsystem, 0, True)
+        self.defaultCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 0, True)
+        self.defaultAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 0, True)
+        self.swerveCommand = SwerveDriveCommand(
+            self.swerveSubsystem, self.driverController
+        )
+
+        #Set Default Commands
         self.swerveSubsystem.setDefaultCommand(self.swerveCommand)
         self.algiArmSubsystem.setDefaultCommand(self.defaultAlgiArmCommand)
         self.corralArmSubsystem.setDefaultCommand(self.defaultCorralArmCommand)
+        self.algiIntakeSubsystem.setDefaultCommand(self.deafultAlgiIntakeCommand)
+        self.corralIntakeSubsystem.setDefaultCommand(self.deafultCorralIntakeCommand)
+
+        # Command Groups
+        self.intakeAlgiCommand = ParallelCommandGroup(self.intakeAlgiIntakeCommand, self.pickAlgiArmCommand)
+        self.intakeCorralCommand = ParallelCommandGroup(self.intakeCorralIntakeCommand, self.intakeCorralArmCommand)
 
         self.configure_button_bindings()
+
 
     def configure_button_bindings(self):
         self.driverController.b().onTrue(
@@ -87,8 +109,10 @@ class RobotContainer:
             SlowSwerveDriveCommand(self.swerveSubsystem, self.driverController)
         )
 
-        self.operatorController.b().toggleOnTrue(self.algiArmCommand)
-        self.operatorController.a().toggleOnTrue(self.coralArmCommand)
+        self.operatorController.b().toggleOnTrue(self.intakeAlgiCommand)
+        self.operatorController.a().toggleOnTrue(self.intakeCorralCommand)
+        self.operatorController.y().toggleOnTrue(self.l3ArmCommand)
+        self.operatorController.x().toggleOnTrue(self.outputCorralIntakeCommand)
 
     def getYellowLEDCommand(self):
         return self.led_command_yellow

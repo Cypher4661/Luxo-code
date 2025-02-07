@@ -72,7 +72,7 @@ class corralArmSubsys(Subsystem):
 
     def reset_encoder(self) -> None:
         pose = self.absolute_encoder.get() - CoralSubsys.encoder_offset
-        self.motor.set_position(pose)
+        self.motor.set_position(0)
 
     def at_limit(self) -> bool:
         return not self.limit.get()

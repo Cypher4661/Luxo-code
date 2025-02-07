@@ -4,14 +4,14 @@ from Constants import CoralSubsys
 
 
 class corralArmCommand(Command):
-    def __init__(self, subsys: corralArmSubsys, angle: float):
+    def __init__(self, subsys: corralArmSubsys, angle: float, isDeafultCommand:bool = False):
         self.angle = angle
         self.subsys = subsys
         self.addRequirements(subsys)
+        self.isDeafultCommand = isDeafultCommand
         super().__init__()
 
     def initialize(self):
-        self.subsys.reset_encoder()
         return super().initialize()
 
     def execute(self):
@@ -23,3 +23,10 @@ class corralArmCommand(Command):
         else:
             self.subsys.motor_to_position(self.angle)
         return super().execute()
+
+    def isFinished(self):
+        return not self.isDeafultCommand and abs(self.subsys.get_current_angle() - self.angle) <= CoralSubsys.deadBand
+        return super().isFinished()
+    
+    def end(self, interrupted):
+        return super().end(interrupted)

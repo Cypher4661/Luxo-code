@@ -10,7 +10,7 @@ class algiIntake(Subsystem):
     def __init__(self) -> None:
         super().__init__()
         self.motor: phoenix6.hardware.TalonFX = self.config_motor(
-            phoenix6.hardware.TalonFX(AlgiIntake.motor_id, ""), True
+            phoenix6.hardware.TalonFX(AlgiIntake.motor_id, ""), False
         )
         self.controller = phoenix6.controls.DutyCycleOut(0)
         SmartDashboard.putData("Algi Intake", self)
@@ -26,9 +26,9 @@ class algiIntake(Subsystem):
         )
         talonConfig.motor_output.neutral_mode = NeutralModeValue.BRAKE
         talonConfig.motor_output.peak_forward_duty_cycle = AlgiIntake.maxVolts / 12
-        talonConfig.motor_output.peak_reverse_duty_cycle = AlgiIntake.maxVolts / 12
+        talonConfig.motor_output.peak_reverse_duty_cycle = -AlgiIntake.maxVolts / 12
         talonConfig.voltage.peak_forward_voltage = AlgiIntake.maxVolts
-        talonConfig.voltage.peak_reverse_voltage = AlgiIntake.maxVolts
+        talonConfig.voltage.peak_reverse_voltage = -AlgiIntake.maxVolts
         talonConfig.current_limits.supply_current_limit = AlgiIntake.maxAmper + 1
         talonConfig.current_limits.supply_current_limit_enable = True
         talonConfig.open_loop_ramps.duty_cycle_open_loop_ramp_period = AlgiIntake.rampUp
@@ -43,11 +43,17 @@ class algiIntake(Subsystem):
         motor.configurator.apply(talonConfig)
         return motor
 
-    def duty_motor(self, power) -> None:
+    def duty_motor(self, power:float) -> None:
         self.motor.set_control(self.controller.with_output(power))
 
-    def get_motor_velocity(self) -> None:
+    def stop(self) -> None:
+        self.motor.set_control(self.controller.with_output(0))
+
+    def get_motor_velocity(self) -> float:
         return self.motor.get_rotor_velocity().value_as_double
+    
+    def get_motor_current(self) -> float:
+        return self.motor.get_stator_current().value_as_double
 
     def initSendable(self, builder: SendableBuilder) -> None:
         builder.addDoubleProperty(

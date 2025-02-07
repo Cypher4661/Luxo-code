@@ -26,9 +26,9 @@ class corralIntake(Subsystem):
         )
         talonConfig.motor_output.neutral_mode = NeutralModeValue.BRAKE
         talonConfig.motor_output.peak_forward_duty_cycle = CorralIntake.maxVolts / 12
-        talonConfig.motor_output.peak_reverse_duty_cycle = CorralIntake.maxVolts / 12
+        talonConfig.motor_output.peak_reverse_duty_cycle = -CorralIntake.maxVolts / 12
         talonConfig.voltage.peak_forward_voltage = CorralIntake.maxVolts
-        talonConfig.voltage.peak_reverse_voltage = CorralIntake.maxVolts
+        talonConfig.voltage.peak_reverse_voltage = -CorralIntake.maxVolts
         talonConfig.current_limits.supply_current_limit = CorralIntake.maxAmper + 1
         talonConfig.current_limits.supply_current_limit_enable = True
         talonConfig.open_loop_ramps.duty_cycle_open_loop_ramp_period = (
@@ -48,8 +48,14 @@ class corralIntake(Subsystem):
     def duty_motor(self, power: float) -> None:
         self.motor.set_control(self.controller.with_output(power))
 
+    def stop(self) -> None:
+        self.motor.set_control(self.controller.with_output(0))
+
     def get_motor_velocity(self) -> float:
         return self.motor.get_rotor_velocity().value_as_double
+
+    def get_motor_current(self) -> float:
+        return self.motor.get_stator_current().value_as_double
 
     def initSendable(self, builder: SendableBuilder) -> None:
         return super().initSendable(builder)

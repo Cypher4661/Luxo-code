@@ -40,6 +40,12 @@ class algiArmSubsys(Subsystem):
         config.closedLoop.smartMotion.maxVelocity(AlgiSubsys.maxVelocity)
         config.closedLoop.smartMotion.minOutputVelocity(AlgiSubsys.minVelocity)
 
+        config.closedLoop.maxMotion.maxAcceleration(AlgiSubsys.maxAcceleration)
+        config.closedLoop.maxMotion.maxVelocity(AlgiSubsys.maxVelocity)
+
+        config.closedLoop.maxOutput(AlgiSubsys.maxPower)
+        config.closedLoop.minOutput(-AlgiSubsys.maxPower)
+
         config.closedLoop.setFeedbackSensor(
             rev.ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder
         )
@@ -53,19 +59,19 @@ class algiArmSubsys(Subsystem):
 
     def rest_encoder(self) -> None:
         pose = self.absolute_encoder.get() - AlgiSubsys.encoder_offset
-        self.encoder.setPosition(pose)
+        self.encoder.setPosition(0)
         encoder = self.motor2.getEncoder()
-        encoder.setPosition(pose)
+        encoder.setPosition(0)
 
     def at_limit(self) -> bool:
         return not self.limit.get()
 
     def motor_to_position(self, angle: float) -> None:
         self.motor1_controller.setReference(
-            self.degrees_to_rotation(angle), rev.SparkLowLevel.ControlType.kPosition
+            angle, rev.SparkLowLevel.ControlType.kPosition
         )
         self.motor2_controller.setReference(
-            self.degrees_to_rotation(angle), rev.SparkLowLevel.ControlType.kPosition
+            angle, rev.SparkLowLevel.ControlType.kPosition
         )
 
     def stop(self) -> None:

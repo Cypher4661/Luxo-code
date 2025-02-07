@@ -4,18 +4,24 @@ from Constants import CorralIntake
 
 
 class corralIntakeCommand(Command):
-    def __init__(self, subsys: corralIntake, power: float):
+    def __init__(self, subsys: corralIntake, power: float, isDeafultCommand:bool = False):
         self.power = power
         self.subsys = subsys
         self.addRequirements(subsys)
+        self.isDeafultCommand = isDeafultCommand
         super().__init__()
 
     def initialize(self):
         return super().initialize()
 
     def execute(self):
-        if self.subsys.get_motor_velocity() <= CorralIntake.min_velocity:
-            self.subsys.duty_motor(0)
-        else:
-            self.subsys.duty_motor(self.power)
+        self.subsys.duty_motor(self.power)
         return super().execute()
+    
+    def isFinished(self):
+        return not self.isDeafultCommand and self.subsys.get_motor_current() >= 10.5
+        return super().isFinished()
+    
+    def end(self, interrupted):
+        self.subsys.stop()
+        return super().end(interrupted)
