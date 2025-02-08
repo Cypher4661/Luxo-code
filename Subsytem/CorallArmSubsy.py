@@ -1,13 +1,14 @@
 from commands2 import Subsystem
 from phoenix6.configs.talon_fx_configs import InvertedValue, NeutralModeValue
 from phoenix6.hardware import TalonFX
+import phoenix6.utils
 from Constants import CoralSubsys
 import phoenix6
 import wpilib
 from wpilib import SmartDashboard
 from wpiutil import SendableBuilder
 from wpilib import DutyCycleEncoder
-
+from rev import AbsoluteEncoder
 
 class corralArmSubsys(Subsystem):
     def __init__(self) -> None:
@@ -69,7 +70,7 @@ class corralArmSubsys(Subsystem):
 
     def periodic(self):
         return super().periodic()
-
+   
     def reset_encoder(self) -> None:
         pose = self.absolute_encoder.get() - CoralSubsys.encoder_offset
         self.motor.set_position(0)

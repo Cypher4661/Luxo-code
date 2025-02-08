@@ -62,9 +62,10 @@ class RobotContainer:
         self.intakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, 0.5)
         self.intakeCorralIntakeCommand = corralIntakeCommand(self.corralIntakeSubsystem, 0.5)
         self.outputAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, -0.5)
-        self.outputCorralIntakeCommand = corralIntakeCommand(self.corralIntakeSubsystem, -0.5)
+        self.outputCorralIntakeCommand = corralIntakeCommand(self.corralIntakeSubsystem, -0.15)
         self.l3ArmCommand = corralArmCommand(self.corralArmSubsystem, 135,True)
-        self.intakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 0)
+        self.l2ArmCommand = corralArmCommand(self.corralArmSubsystem, 165, True)
+        self.intakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 42.5)
         self.pickAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 45)
         self.led_command_green = ledCommand(self.led_subsys, [0, 255, 0])
         self.led_command_blue = ledCommand(self.led_subsys, [0, 0, 255])
@@ -111,7 +112,8 @@ class RobotContainer:
 
         self.operatorController.b().toggleOnTrue(self.intakeAlgiCommand)
         self.operatorController.a().toggleOnTrue(self.intakeCorralCommand)
-        self.operatorController.y().toggleOnTrue(self.l3ArmCommand)
+        self.operatorController.rightBumper().toggleOnTrue(self.l3ArmCommand)
+        self.operatorController.leftBumper().toggleOnTrue(self.l2ArmCommand)
         self.operatorController.x().toggleOnTrue(self.outputCorralIntakeCommand)
 
     def getYellowLEDCommand(self):

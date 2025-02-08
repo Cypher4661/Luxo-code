@@ -25,7 +25,7 @@ class CorralIntake:
 
 class CoralSubsys:
     motor_id = 21
-    deadBand = 0.5  # degrees
+    deadBand = 1  # degrees
     maxVolts = 12
     maxAmper = 40
     rampUp = 0.1
@@ -42,11 +42,11 @@ class CoralSubsys:
     acceleration = 60
     jerk = 600
     revcoder = 7
-    encoder_offset = 0
+    encoder_offset = 0.5823
 
 
 class AlgiSubsys:
-    deadband = 0.5 # degrees
+    deadband = 1 # degrees
     motor1_id = 31
     motor2_id = 32
     limit_id = 5
@@ -62,7 +62,7 @@ class AlgiSubsys:
     minVelocity = 0
     maxAcceleration = 40
     revcoder = 2
-    encoder_offset = 0
+    encoder_offset = 0.426
     maxPower = 0.6
 
 

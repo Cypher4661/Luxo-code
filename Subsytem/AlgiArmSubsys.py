@@ -57,6 +57,9 @@ class algiArmSubsys(Subsystem):
         )
         return motor
 
+    def periodic(self):
+        return super().periodic()
+
     def rest_encoder(self) -> None:
         pose = self.absolute_encoder.get() - AlgiSubsys.encoder_offset
         self.encoder.setPosition(0)
