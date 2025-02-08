@@ -5,14 +5,16 @@ from Constants import AlgiSubsys
 
 
 class algiArmCommand(Command):
-    def __init__(self, subsys: algiArmSubsys, angle: float, isDeafultCommand:bool = False):
+    def __init__(
+        self, subsys: algiArmSubsys, angle: float, isDeafultCommand: bool = False
+    ):
         self.subsys: algiArmSubsys = subsys
         self.addRequirements(subsys)
         self.angle = angle
         self.isDeafultCommand = isDeafultCommand
         super().__init__()
 
-    def initialize(self): 
+    def initialize(self):
         return super().initialize()
 
     def execute(self):
@@ -26,9 +28,13 @@ class algiArmCommand(Command):
         return super().execute()
 
     def isFinished(self):
-        return not self.isDeafultCommand and abs(self.subsys.get_current_degree() - self.angle) <= AlgiSubsys.deadband
+        return (
+            not self.isDeafultCommand
+            and abs(self.subsys.get_current_degree() - self.angle)
+            <= AlgiSubsys.deadband
+        )
         return super().isFinished()
-    
+
     def end(self, interrupted):
         self.subsys.stop()
         return super().end(interrupted)
