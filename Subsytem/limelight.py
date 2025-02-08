@@ -41,6 +41,8 @@ class limelight(Subsystem):
 
     def get_target_position(self, light: NetworkTable) -> Tuple:
         april_pose = light.getNumberArray("camerapose_targetspace", [999] * 6)
+        if april_pose[0] == 999:
+            return (0, 0, 0)
         x = april_pose[0]
         y = april_pose[2]
         yaw = april_pose[4]

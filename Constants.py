@@ -46,7 +46,7 @@ class CoralSubsys:
 
 
 class AlgiSubsys:
-    deadband = 1 # degrees
+    deadband = 1  # degrees
     motor1_id = 31
     motor2_id = 32
     limit_id = 5
