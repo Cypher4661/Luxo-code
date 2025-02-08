@@ -4,17 +4,20 @@ import wpilib
 from wpiutil import SendableBuilder
 from Constants import AlgiSubsys
 from wpilib import SmartDashboard
+from cscore import CameraServer
+
 
 
 class algiArmSubsys(Subsystem):
     def __init__(self) -> None:
         super().__init__()
+        CameraServer.startAutomaticCapture()
         # add constants
         self.motor1 = self.motor_config(
-            rev.SparkMax(AlgiSubsys.motor1_id, AlgiSubsys.motor1_type), True
+            rev.SparkMax(AlgiSubsys.motor1_id, AlgiSubsys.motor1_type), False
         )
         self.motor2 = self.motor_config(
-            rev.SparkMax(AlgiSubsys.motor2_id, AlgiSubsys.motor2_type), False
+            rev.SparkMax(AlgiSubsys.motor2_id, AlgiSubsys.motor2_type), True
         )
 
         self.motor1_controller = self.motor1.getClosedLoopController()
@@ -62,9 +65,10 @@ class algiArmSubsys(Subsystem):
 
     def rest_encoder(self) -> None:
         pose = self.absolute_encoder.get() - AlgiSubsys.encoder_offset
-        self.encoder.setPosition(0)
+        self.encoder.setPosition(pose * AlgiSubsys.gear_ratio)
         encoder = self.motor2.getEncoder()
-        encoder.setPosition(0)
+        encoder.setPosition(pose * AlgiSubsys.gear_ratio)
+        SmartDashboard.putNumber('alge arm init angle', pose)
 
     def at_limit(self) -> bool:
         return not self.limit.get()
@@ -88,10 +92,14 @@ class algiArmSubsys(Subsystem):
         return angle / 360
 
     def get_current_degree(self) -> float:
-        return self.rotation_to_degrees(self.encoder.getPosition())
+        return self.rotation_to_degrees(self.encoder.getPosition())/AlgiSubsys.gear_ratio
 
     def initSendable(self, builder: SendableBuilder) -> None:
         builder.addDoubleProperty(
-            "System Position", self.get_current_degree, lambda x: None
+            "Alge Arm Angle", self.get_current_degree, lambda x: None
         )
+        builder.addDoubleProperty("absolute_encoder ", self.absolute_encoder.get, lambda x: None)
+
+        builder.addBooleanProperty("absolute_encoder is con", self.absolute_encoder.isConnected, lambda x: None)
+        
         return super().initSendable(builder)

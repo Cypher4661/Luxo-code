@@ -60,6 +60,7 @@ class RobotContainer:
         
         # Commands
         self.intakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, 0.5)
+        self.outTakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, -1)
         self.intakeCorralIntakeCommand = corralIntakeCommand(self.corralIntakeSubsystem, 0.5)
         self.outputAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, -0.5)
         self.outputCorralIntakeCommand = corralIntakeCommand(self.corralIntakeSubsystem, -0.15)
@@ -93,6 +94,7 @@ class RobotContainer:
 
         # Command Groups
         self.intakeAlgiCommand = ParallelCommandGroup(self.intakeAlgiIntakeCommand, self.pickAlgiArmCommand)
+        self.outtakeAlgiCommand = self.outTakeAlgiIntakeCommand.withTimeout(2)
         self.intakeCorralCommand = ParallelCommandGroup(self.intakeCorralIntakeCommand, self.intakeCorralArmCommand)
 
         self.configure_button_bindings()
@@ -115,6 +117,7 @@ class RobotContainer:
         self.operatorController.rightBumper().toggleOnTrue(self.l3ArmCommand)
         self.operatorController.leftBumper().toggleOnTrue(self.l2ArmCommand)
         self.operatorController.x().toggleOnTrue(self.outputCorralIntakeCommand)
+        self.operatorController.y().toggleOnTrue(self.outtakeAlgiCommand)
 
     def getYellowLEDCommand(self):
         return self.led_command_yellow

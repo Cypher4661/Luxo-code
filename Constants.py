@@ -64,6 +64,7 @@ class AlgiSubsys:
     revcoder = 2
     encoder_offset = 0.426
     maxPower = 0.6
+    gearRatio = 60
 
 
 class led:
