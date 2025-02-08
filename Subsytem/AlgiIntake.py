@@ -43,7 +43,7 @@ class algiIntake(Subsystem):
         motor.configurator.apply(talonConfig)
         return motor
 
-    def duty_motor(self, power:float) -> None:
+    def duty_motor(self, power: float) -> None:
         self.motor.set_control(self.controller.with_output(power))
 
     def stop(self) -> None:
@@ -51,7 +51,7 @@ class algiIntake(Subsystem):
 
     def get_motor_velocity(self) -> float:
         return self.motor.get_rotor_velocity().value_as_double
-    
+
     def get_motor_current(self) -> float:
         return self.motor.get_stator_current().value_as_double
 

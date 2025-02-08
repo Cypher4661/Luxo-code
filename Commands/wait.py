@@ -17,3 +17,8 @@ class waitCommand(Command):
 
     def isFinished(self) -> bool:
         return self.time.get() >= self.delay
+
+    def end(self, interrupted):
+        self.time.stop()
+        self.time.reset()
+        return super().end(interrupted)
