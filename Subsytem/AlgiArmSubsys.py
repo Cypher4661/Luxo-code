@@ -4,20 +4,17 @@ import wpilib
 from wpiutil import SendableBuilder
 from Constants import AlgiSubsys
 from wpilib import SmartDashboard
-from cscore import CameraServer
-
 
 
 class algiArmSubsys(Subsystem):
     def __init__(self) -> None:
         super().__init__()
-        CameraServer.startAutomaticCapture()
         # add constants
         self.motor1 = self.motor_config(
-            rev.SparkMax(AlgiSubsys.motor1_id, AlgiSubsys.motor1_type), False
+            rev.SparkMax(AlgiSubsys.motor1_id, AlgiSubsys.motor1_type), True
         )
         self.motor2 = self.motor_config(
-            rev.SparkMax(AlgiSubsys.motor2_id, AlgiSubsys.motor2_type), True
+            rev.SparkMax(AlgiSubsys.motor2_id, AlgiSubsys.motor2_type), False
         )
 
         self.motor1_controller = self.motor1.getClosedLoopController()
@@ -64,10 +61,10 @@ class algiArmSubsys(Subsystem):
         return super().periodic()
 
     def rest_encoder(self) -> None:
-        pose = self.absolute_encoder.get() - AlgiSubsys.encoder_offset
-        self.encoder.setPosition(pose * AlgiSubsys.gear_ratio)
+        pose = 1-self.absolute_encoder.get()-AlgiSubsys.encoder_offset
+        self.encoder.setPosition(0)
         encoder = self.motor2.getEncoder()
-        encoder.setPosition(pose * AlgiSubsys.gear_ratio)
+        encoder.setPosition(0)
         SmartDashboard.putNumber('alge arm init angle', pose)
 
     def at_limit(self) -> bool:
@@ -92,7 +89,7 @@ class algiArmSubsys(Subsystem):
         return angle / 360
 
     def get_current_degree(self) -> float:
-        return self.rotation_to_degrees(self.encoder.getPosition())/AlgiSubsys.gear_ratio
+        return self.encoder.getPosition()
 
     def initSendable(self, builder: SendableBuilder) -> None:
         builder.addDoubleProperty(

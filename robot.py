@@ -2,7 +2,6 @@ import wpilib
 import commands2
 from RobotContainer import RobotContainer
 
-
 class MyRobot(commands2.TimedCommandRobot):
     # robot
     def robotInit(self) -> None:

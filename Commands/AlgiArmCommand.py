@@ -14,7 +14,7 @@ class algiArmCommand(Command):
         self.isDeafultCommand = isDeafultCommand
         super().__init__()
 
-    def initialize(self):
+    def initialize(self): 
         return super().initialize()
 
     def execute(self):
@@ -35,6 +35,6 @@ class algiArmCommand(Command):
         )
         return super().isFinished()
 
-    def end(self, interrupted):
+    def end(self, interrupted): 
         self.subsys.stop()
         return super().end(interrupted)

@@ -30,12 +30,22 @@ from Subsytem.AlgiIntake import algiIntake
 from Subsytem.CorralIntake import corralIntake
 from wpimath.geometry import Pose2d, Rotation2d
 import math
-from commands2 import SequentialCommandGroup
-from commands2 import ParallelCommandGroup
+from commands2 import SequentialCommandGroup, ParallelCommandGroup, ParallelDeadlineGroup
+from cscore import CameraServer
 
 
 class RobotContainer:
     def __init__(self):
+        #camera
+
+        #self.camera1 = CameraServer.startAutomaticCapture(0)
+        #self.camera2 = CameraServer.startAutomaticCapture(1)
+        #self.server = CameraServer.addSwitchedCamera("Switch Camera")
+        #self.camera1.setResolution(10,10)
+        #self.camera2.setResolution(10,10)
+        #self.camera1.setConnectionStrategy(self.camera1.ConnectionStrategy.kConnectionKeepOpen)
+        #self.camera2.setConnectionStrategy(self.camera2.ConnectionStrategy.kConnectionKeepOpen)
+
         # Random Data
         self.led_bool_enable = True
         self.led_bool_disable = True
@@ -75,12 +85,14 @@ class RobotContainer:
         self.l2ArmCommand = corralArmCommand(self.corralArmSubsystem, 165, True)
 
         self.intakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 42.5)
-        self.pickAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 45)
+        self.pickAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 42.5)
 
         self.led_command_green = ledCommand(self.led_subsys, [0, 255, 0])
         self.led_command_blue = ledCommand(self.led_subsys, [0, 0, 255])
         self.led_command_red = ledCommand(self.led_subsys, [255, 0, 0])
         self.led_command_yellow = ledCommand(self.led_subsys, [255, 0, 100])
+
+        self.led_command_flash_blue = LEDAnimationCommand(self.led_subsys, [0,0,255], [0,0,0], 0.1)
 
         # Deafult Commands
         self.deafultAlgiIntakeCommand = algiIntakeCommand(
@@ -105,17 +117,20 @@ class RobotContainer:
         self.corralIntakeSubsystem.setDefaultCommand(self.deafultCorralIntakeCommand)
 
         # Command Groups
-        self.intakeAlgiCommand = ParallelCommandGroup(
-            self.intakeAlgiIntakeCommand, self.pickAlgiArmCommand
+        self.intakeAlgiCommand = ParallelDeadlineGroup(
+            self.intakeAlgiIntakeCommand, self.pickAlgiArmCommand, self.led_command_flash_blue
         )
         self.outtakeAlgiCommand = self.outTakeAlgiIntakeCommand.withTimeout(2)
         self.intakeCorralCommand = ParallelCommandGroup(
             self.intakeCorralIntakeCommand, self.intakeCorralArmCommand
         )
-
+ 
         self.configure_button_bindings()
 
     def configure_button_bindings(self):
+
+        # Driver Controller
+
         self.driverController.b().onTrue(
             commands2.cmd.runOnce(lambda: self.swerveSubsystem.zeroHeading())
         )
@@ -125,8 +140,8 @@ class RobotContainer:
         self.driverController.a().toggleOnTrue(
             SlowSwerveDriveCommand(self.swerveSubsystem, self.driverController)
         )
-        self.driverController.leftBumper().toggleOnTrue(self.april_tag_path(self.left))
-        self.driverController.rightBumper().toggleOnTrue(self.april_tag_path(self.left))
+
+        #Operator Controller
 
         self.operatorController.b().toggleOnTrue(self.intakeAlgiCommand)
         self.operatorController.a().toggleOnTrue(self.intakeCorralCommand)
@@ -134,12 +149,21 @@ class RobotContainer:
         self.operatorController.leftBumper().toggleOnTrue(self.l2ArmCommand)
         self.operatorController.x().toggleOnTrue(self.outputCorralIntakeCommand)
         self.operatorController.y().toggleOnTrue(self.outtakeAlgiCommand)
+        self.operatorController.povUp().toggleOnTrue(
+            commands2.cmd.runOnce(lambda: self.server.setSource(self.camera1))
+        )
+        self.operatorController.povUp().toggleOnFalse(
+            commands2.cmd.runOnce(lambda: self.server.setSource(self.camera2))
+        )
 
     def getYellowLEDCommand(self):
         return self.led_command_yellow
 
     def getRedLEDCommand(self):
         return self.led_command_red
+
+    def getAlgiArmSubsys(self):
+        return self.algiArmSubsystem
 
     def create_path_command(
         self,
