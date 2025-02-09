@@ -56,15 +56,14 @@ class AlgiSubsys:
     convertion_factor = 360 / gear_ratio
     kp = 0.01
     ki = 0.0
-    kd = 0.0
+    kd = 0.01
     kf = 0.0
     maxVelocity = 20
     minVelocity = 0
     maxAcceleration = 40
     revcoder = 2
-    encoder_offset = 0.426
-    maxPower = 0.6
-    gearRatio = 60
+    encoder_offset = 0.578
+    maxPower = 0.7
 
 
 class led:
