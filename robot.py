@@ -34,8 +34,7 @@ class MyRobot(commands2.TimedCommandRobot):
         self.container.getRedLEDCommand().schedule()
         return super().disabledInit()
 
-    def disabledExit(self) -> None:
-        self.container.getYellowLEDCommand().schedule()
+    def disabledExit(self) -> None: 
         return super().disabledExit()
 
 
