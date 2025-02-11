@@ -18,9 +18,9 @@ class algiArmCommand(Command):
         return super().initialize()
 
     def execute(self):
-        if (
-            self.subsys.at_limit()
-            or abs(self.subsys.get_current_degree() - self.angle) <= AlgiSubsys.deadband
+        if(
+            self.subsys.at_limit() or
+            abs(self.subsys.get_current_degree() - self.angle) <= AlgiSubsys.deadband
         ):
             self.subsys.stop()
         else:

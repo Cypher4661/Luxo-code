@@ -10,10 +10,13 @@ class ledCommand(Command):
         self.addRequirements(self.subsys)
         super().__init__()
 
-    def initialize(self):
+    def initialize(self):        
+        return super().initialize()
+
+    def execute(self):
         self.subsys.change_color(self.color)
         self.run = True
-        return super().initialize()
+        return super().execute()
 
     def isFinished(self) -> bool:
         return self.run

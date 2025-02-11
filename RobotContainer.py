@@ -38,7 +38,7 @@ class RobotContainer:
     def __init__(self):
         #camera
 
-        #self.camera1 = CameraServer.startAutomaticCapture(0)
+        self.camera1 = CameraServer.startAutomaticCapture(0)
         #self.camera2 = CameraServer.startAutomaticCapture(1)
         #self.server = CameraServer.addSwitchedCamera("Switch Camera")
         #self.camera1.setResolution(10,10)
@@ -70,7 +70,8 @@ class RobotContainer:
         self.algiArmSubsystem = algiArmSubsys()
 
         # Commands
-        self.intakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, 0.5)
+        self.intakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, 0.35)
+        self.holdAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, 0.01, True)
         self.outTakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, -1)
         self.intakeCorralIntakeCommand = corralIntakeCommand(
             self.corralIntakeSubsystem, 0.5
@@ -78,19 +79,20 @@ class RobotContainer:
 
         self.outputAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, -0.5)
         self.outputCorralIntakeCommand = corralIntakeCommand(
-            self.corralIntakeSubsystem, -0.15
+            self.corralIntakeSubsystem, -0.25
         )
 
         self.l3ArmCommand = corralArmCommand(self.corralArmSubsystem, 135, True)
         self.l2ArmCommand = corralArmCommand(self.corralArmSubsystem, 165, True)
 
         self.intakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 42.5)
-        self.pickAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 42.5)
+        self.pickAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 69.25, True)
+        self.outputAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 17.5, True)
 
         self.led_command_green = ledCommand(self.led_subsys, [0, 255, 0])
         self.led_command_blue = ledCommand(self.led_subsys, [0, 0, 255])
         self.led_command_red = ledCommand(self.led_subsys, [255, 0, 0])
-        self.led_command_yellow = ledCommand(self.led_subsys, [255, 0, 100])
+        self.led_command_yellow = ledCommand(self.led_subsys, [255, 255, 0])
 
         self.led_command_flash_blue = LEDAnimationCommand(self.led_subsys, [0,0,255], [0,0,0], 0.1)
 
@@ -108,19 +110,19 @@ class RobotContainer:
         self.swerveCommand = SwerveDriveCommand(
             self.swerveSubsystem, self.driverController
         )
+        self.led_subsys.setDefaultCommand(self.led_command_yellow)
 
         # Set Default Commands
         self.swerveSubsystem.setDefaultCommand(self.swerveCommand)
         self.algiArmSubsystem.setDefaultCommand(self.defaultAlgiArmCommand)
         self.corralArmSubsystem.setDefaultCommand(self.defaultCorralArmCommand)
-        self.algiIntakeSubsystem.setDefaultCommand(self.deafultAlgiIntakeCommand)
+        self.algiIntakeSubsystem.setDefaultCommand(self.holdAlgiIntakeCommand)
         self.corralIntakeSubsystem.setDefaultCommand(self.deafultCorralIntakeCommand)
 
         # Command Groups
         self.intakeAlgiCommand = ParallelDeadlineGroup(
             self.intakeAlgiIntakeCommand, self.pickAlgiArmCommand, self.led_command_flash_blue
         )
-        self.outtakeAlgiCommand = self.outTakeAlgiIntakeCommand.withTimeout(2)
         self.intakeCorralCommand = ParallelCommandGroup(
             self.intakeCorralIntakeCommand, self.intakeCorralArmCommand
         )
@@ -148,7 +150,8 @@ class RobotContainer:
         self.operatorController.rightBumper().toggleOnTrue(self.l3ArmCommand)
         self.operatorController.leftBumper().toggleOnTrue(self.l2ArmCommand)
         self.operatorController.x().toggleOnTrue(self.outputCorralIntakeCommand)
-        self.operatorController.y().toggleOnTrue(self.outtakeAlgiCommand)
+        self.operatorController.y().toggleOnTrue(self.outputAlgiIntakeCommand)
+        self.operatorController.povDown().toggleOnTrue(self.outputAlgiArmCommand)
         self.operatorController.povUp().toggleOnTrue(
             commands2.cmd.runOnce(lambda: self.server.setSource(self.camera1))
         )

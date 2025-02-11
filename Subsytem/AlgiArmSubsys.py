@@ -58,13 +58,14 @@ class algiArmSubsys(Subsystem):
         return motor
 
     def periodic(self):
+        self.rest_encoder()
         return super().periodic()
 
     def rest_encoder(self) -> None:
         pose = 1-self.absolute_encoder.get()-AlgiSubsys.encoder_offset
-        self.encoder.setPosition(0)
+        self.encoder.setPosition(pose*360)
         encoder = self.motor2.getEncoder()
-        encoder.setPosition(0)
+        encoder.setPosition(pose*360)
         SmartDashboard.putNumber('alge arm init angle', pose)
 
     def at_limit(self) -> bool:
