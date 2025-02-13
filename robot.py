@@ -21,7 +21,7 @@ class MyRobot(commands2.TimedCommandRobot):
             self.auto_command.schedule()
 
     def autonomousPeriodic(self) -> None:
-        self.auto_command.cancel()
+        pass
 
     # teleoperated
     def teleopInit(self) -> None:

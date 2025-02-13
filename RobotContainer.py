@@ -39,12 +39,8 @@ class RobotContainer:
         #camera
 
         self.camera1 = CameraServer.startAutomaticCapture(0)
-        #self.camera2 = CameraServer.startAutomaticCapture(1)
-        #self.server = CameraServer.addSwitchedCamera("Switch Camera")
-        #self.camera1.setResolution(10,10)
-        #self.camera2.setResolution(10,10)
-        #self.camera1.setConnectionStrategy(self.camera1.ConnectionStrategy.kConnectionKeepOpen)
-        #self.camera2.setConnectionStrategy(self.camera2.ConnectionStrategy.kConnectionKeepOpen)
+        self.camera2 = CameraServer.startAutomaticCapture(1)
+        self.server = CameraServer.addSwitchedCamera("Switch Camera")
 
         # Random Data
         self.led_bool_enable = True
@@ -70,6 +66,8 @@ class RobotContainer:
         self.algiArmSubsystem = algiArmSubsys()
 
         # Commands
+        self.specialIntakeHoldCorralCommand = corralIntakeCommand(self.corralIntakeSubsystem, 0.1, True)
+        self.specialIntakeCorralCommand = corralIntakeCommand(self.corralIntakeSubsystem, -0.5)
         self.intakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, 0.35)
         self.holdAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, 0.01, True)
         self.outTakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, -1)
@@ -79,13 +77,14 @@ class RobotContainer:
 
         self.outputAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, -0.5)
         self.outputCorralIntakeCommand = corralIntakeCommand(
-            self.corralIntakeSubsystem, -0.25
+            self.corralIntakeSubsystem, -0.2
         )
 
         self.l3ArmCommand = corralArmCommand(self.corralArmSubsystem, 135, True)
-        self.l2ArmCommand = corralArmCommand(self.corralArmSubsystem, 165, True)
+        self.l2ArmCommand = corralArmCommand(self.corralArmSubsystem, 42.5, True)
 
         self.intakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 42.5)
+        self.specialIntakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 72.5)
         self.pickAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 69.25, True)
         self.outputAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 17.5, True)
 
@@ -126,7 +125,10 @@ class RobotContainer:
         self.intakeCorralCommand = ParallelCommandGroup(
             self.intakeCorralIntakeCommand, self.intakeCorralArmCommand
         )
- 
+        self.specialCorralIntakeCommand = ParallelDeadlineGroup(
+            self.specialIntakeCorralCommand, self.specialIntakeCorralArmCommand
+        ).andThen(self.specialIntakeHoldCorralCommand)
+        
         self.configure_button_bindings()
 
     def configure_button_bindings(self):
@@ -151,13 +153,9 @@ class RobotContainer:
         self.operatorController.leftBumper().toggleOnTrue(self.l2ArmCommand)
         self.operatorController.x().toggleOnTrue(self.outputCorralIntakeCommand)
         self.operatorController.y().toggleOnTrue(self.outputAlgiIntakeCommand)
-        self.operatorController.povDown().toggleOnTrue(self.outputAlgiArmCommand)
-        self.operatorController.povUp().toggleOnTrue(
-            commands2.cmd.runOnce(lambda: self.server.setSource(self.camera1))
-        )
-        self.operatorController.povUp().toggleOnFalse(
-            commands2.cmd.runOnce(lambda: self.server.setSource(self.camera2))
-        )
+        self.operatorController.povDown().toggleOnTrue(self.specialCorralIntakeCommand)
+        self.operatorController.povUp().toggleOnTrue(self.intakeCorralIntakeCommand)
+        
 
     def getYellowLEDCommand(self):
         return self.led_command_yellow
@@ -189,10 +187,10 @@ class RobotContainer:
         bezierPoints = PathPlannerPath.waypointsFromPoses(
             [
                 Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-                Pose2d(0.5, 0, Rotation2d.fromDegrees(0)),
+                Pose2d(0, 0.5, Rotation2d.fromDegrees(0)),
             ]
         )
-        goalEndState = GoalEndState(0.0, Rotation2d.fromDegrees(0))
+        goalEndState = GoalEndState(0.0, Rotation2d.fromDegrees(45))
         path_follower_command = self.create_path_command(bezierPoints, goalEndState)
         return path_follower_command
 
