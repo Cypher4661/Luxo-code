@@ -54,15 +54,15 @@ class AlgiSubsys:
     motor2_type = SparkMax.MotorType.kBrushless
     gear_ratio = 80
     convertion_factor = 360 / gear_ratio
-    kp = 0.00725
+    kp = 0.015
     ki = 0.0
-    kd = 0.0
+    kd = 0.01
     kf = 0.0
     maxVelocity = 20
     minVelocity = 0
     maxAcceleration = 40
     revcoder = 2
-    encoder_offset = 0.574
+    encoder_offset = 0.404
     maxPower = 1
 
 
