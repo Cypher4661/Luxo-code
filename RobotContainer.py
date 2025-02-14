@@ -75,16 +75,16 @@ class RobotContainer:
             self.corralIntakeSubsystem, 0.5
         )
 
-        self.outputAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, -0.5)
+        self.outputAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, -0.2)
         self.outputCorralIntakeCommand = corralIntakeCommand(
-            self.corralIntakeSubsystem, -0.2
+            self.corralIntakeSubsystem, -0.225
         )
 
         self.l3ArmCommand = corralArmCommand(self.corralArmSubsystem, 135, True)
-        self.l2ArmCommand = corralArmCommand(self.corralArmSubsystem, 42.5, True)
+        self.l2ArmCommand = corralArmCommand(self.corralArmSubsystem, 55.5, True)
 
-        self.intakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 42.5)
-        self.specialIntakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 72.5)
+        self.intakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 48.5)
+        self.specialIntakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 68.5, True)
         self.pickAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 69.25, True)
         self.outputAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 17.5, True)
 
@@ -97,7 +97,7 @@ class RobotContainer:
 
         # Deafult Commands
         self.deafultAlgiIntakeCommand = algiIntakeCommand(
-            self.algiIntakeSubsystem, 0, True
+            self.algiIntakeSubsystem, 0, True, self.operatorController
         )
         self.deafultCorralIntakeCommand = corralIntakeCommand(
             self.corralIntakeSubsystem, 0, True
@@ -127,7 +127,7 @@ class RobotContainer:
         )
         self.specialCorralIntakeCommand = ParallelDeadlineGroup(
             self.specialIntakeCorralCommand, self.specialIntakeCorralArmCommand
-        ).andThen(self.specialIntakeHoldCorralCommand)
+        )
         
         self.configure_button_bindings()
 
@@ -154,7 +154,8 @@ class RobotContainer:
         self.operatorController.x().toggleOnTrue(self.outputCorralIntakeCommand)
         self.operatorController.y().toggleOnTrue(self.outputAlgiIntakeCommand)
         self.operatorController.povDown().toggleOnTrue(self.specialCorralIntakeCommand)
-        self.operatorController.povUp().toggleOnTrue(self.intakeCorralIntakeCommand)
+        self.operatorController.povUp().toggleOnTrue(corralIntakeCommand(self.corralIntakeSubsystem, 0.2, True))
+        self.operatorController.rightTrigger().toggleOnTrue(self.outputAlgiArmCommand)
         
 
     def getYellowLEDCommand(self):
