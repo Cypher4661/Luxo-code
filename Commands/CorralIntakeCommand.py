@@ -4,9 +4,14 @@ from Constants import CorralIntake
 from commands2.button import CommandXboxController
 from wpilib import Timer
 
+
 class corralIntakeCommand(Command):
     def __init__(
-        self, subsys: corralIntake, power: float, isDeafultCommand: bool = False, controller: CommandXboxController = None
+        self,
+        subsys: corralIntake,
+        power: float,
+        isDeafultCommand: bool = False,
+        controller: CommandXboxController = None,
     ):
         self.power = power
         self.subsys = subsys
@@ -28,7 +33,7 @@ class corralIntakeCommand(Command):
         return super().execute()
 
     def isFinished(self):
-        return not self.isDeafultCommand and self.subsys.get_motor_current() >= 40.5 
+        return not self.isDeafultCommand and self.subsys.get_motor_current() >= 40.5
         return super().isFinished()
 
     def end(self, interrupted):

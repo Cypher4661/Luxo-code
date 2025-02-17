@@ -4,6 +4,7 @@ import math
 from wpimath.trajectory import TrapezoidProfileRadians
 from rev import SparkMax
 
+
 class SystemValues:
     l2ArmAngle = 52.5
     l3ArmAngle = 135
@@ -16,7 +17,7 @@ class SystemValues:
     specialCorralIntakeArmAngle = 68.5
     pickAlgiArmAngle = 71
     ouputAlgiArmAngle = 17.5
-    
+
 
 class AlgiIntake:
     motor_id = 33
@@ -51,11 +52,11 @@ class CoralSubsys:
     ks = 0.25
     kv = 0.12
     ka = 0.01
-    velocity = 30
-    acceleration = 60
-    jerk = 600
+    velocity = gearRatio*gearRatio
+    acceleration = gearRatio*gearRatio*2
+    jerk = gearRatio*gearRatio*20
     revcoder = 7
-    encoder_offset = 0.577
+    encoder_offset = 0.582
 
 
 class AlgiSubsys:
