@@ -65,6 +65,11 @@ class RobotContainer:
         self.corralIntakeSubsystem = corralIntake()
         self.algiArmSubsystem = algiArmSubsys()
 
+        self.configure_commands()
+        self.configure_button_bindings()
+
+    def configure_commands(self):
+
         # Commands
         self.specialIntakeCorralCommand = corralIntakeCommand(self.corralIntakeSubsystem, SystemValues.specialCorralIntakePower)
         self.intakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, SystemValues.intakeAlgiPower)
@@ -131,8 +136,6 @@ class RobotContainer:
         self.specialCorralIntakeCommand = ParallelCommandGroup(
             self.specialIntakeCorralCommand, self.specialIntakeCorralArmCommand, self.led_command_flash_white
         )
-        
-        self.configure_button_bindings()
 
     def configure_button_bindings(self):
 

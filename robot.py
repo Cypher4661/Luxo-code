@@ -69,6 +69,8 @@ class MyRobot(commands2.TimedCommandRobot):
             "Output Algi Angle", SystemValues.ouputAlgiArmAngle
         )
 
+        self.container.configure_commands()
+        self.container.configure_button_bindings()
     # autonomus
     def autonomousInit(self) -> None:
         self.auto_command = self.container.get_autonomous_command()
@@ -86,7 +88,6 @@ class MyRobot(commands2.TimedCommandRobot):
         return super().teleopPeriodic()
 
     def disabledInit(self) -> None:
-        self.container.getRedLEDCommand().schedule()
         return super().disabledInit()
 
     def disabledExit(self) -> None:
