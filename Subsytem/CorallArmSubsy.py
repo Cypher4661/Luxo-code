@@ -94,7 +94,7 @@ class corralArmSubsys(Subsystem):
 
     def get_current_angle(self) -> float:
         angle = self.rotation_to_angle(self.motor.get_rotor_position().value_as_double)
-        return self.absolute_encoder.get()
+        return (self.absolute_encoder.get()-CoralSubsys.encoder_offset)*360
 
     def initSendable(self, builder: SendableBuilder) -> None:
         builder.addDoubleProperty(

@@ -1,5 +1,7 @@
 from commands2 import Command
-from Constants import OIConstants, SystemValues
+from Constants import (
+    OIConstants, SystemValues
+)
 from Subsytem.SwerveSubsystem import SwerveSubsystem
 from Subsytem.LEDSubsys import ledSubsys
 from Commands.LEDCommand import ledCommand
@@ -28,17 +30,13 @@ from Subsytem.AlgiIntake import algiIntake
 from Subsytem.CorralIntake import corralIntake
 from wpimath.geometry import Pose2d, Rotation2d
 import math
-from commands2 import (
-    SequentialCommandGroup,
-    ParallelCommandGroup,
-    ParallelDeadlineGroup,
-)
+from commands2 import SequentialCommandGroup, ParallelCommandGroup, ParallelDeadlineGroup
 from cscore import CameraServer
 
 
 class RobotContainer:
     def __init__(self):
-        # camera
+        #camera
 
         self.camera1 = CameraServer.startAutomaticCapture(0)
         self.camera2 = CameraServer.startAutomaticCapture(1)
@@ -68,65 +66,37 @@ class RobotContainer:
         self.algiArmSubsystem = algiArmSubsys()
 
         # Commands
-        self.specialIntakeCorralCommand = corralIntakeCommand(
-            self.corralIntakeSubsystem, SystemValues.specialCorralIntakePower
-        )
-        self.intakeAlgiIntakeCommand = algiIntakeCommand(
-            self.algiIntakeSubsystem, SystemValues.intakeAlgiPower
-        )
-        self.outTakeAlgiIntakeCommand = algiIntakeCommand(
-            self.algiIntakeSubsystem, SystemValues.outputAlgiPower
-        )
+        self.specialIntakeCorralCommand = corralIntakeCommand(self.corralIntakeSubsystem, SystemValues.specialCorralIntakePower)
+        self.intakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, SystemValues.intakeAlgiPower)
+        self.outTakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, SystemValues.outputAlgiPower)
         self.intakeCorralIntakeCommand = corralIntakeCommand(
             self.corralIntakeSubsystem, SystemValues.intakeCorralPower
         )
 
-        self.outputAlgiIntakeCommand = algiIntakeCommand(
-            self.algiIntakeSubsystem, SystemValues.outputAlgiPower
-        )
+        self.outputAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, SystemValues.outputAlgiPower)
         self.outputCorralIntakeCommand = corralIntakeCommand(
             self.corralIntakeSubsystem, SystemValues.outputCorralPower
         )
 
-        self.l3ArmCommand = corralArmCommand(
-            self.corralArmSubsystem, SystemValues.l3ArmAngle, True
-        )
-        self.l2ArmCommand = corralArmCommand(
-            self.corralArmSubsystem, SystemValues.l2ArmAngle, True
-        )
+        self.l3ArmCommand = corralArmCommand(self.corralArmSubsystem, SystemValues.l3ArmAngle, True)
+        self.l2ArmCommand = corralArmCommand(self.corralArmSubsystem, SystemValues.l2ArmAngle, True)
 
-        self.intakeCorralArmCommand = corralArmCommand(
-            self.corralArmSubsystem, SystemValues.intakeCorralArmAngle, True
-        )
-        self.specialIntakeCorralArmCommand = corralArmCommand(
-            self.corralArmSubsystem, SystemValues.specialCorralIntakeArmAngle, True
-        )
-        self.pickAlgiArmCommand = algiArmCommand(
-            self.algiArmSubsystem, SystemValues.pickAlgiArmAngle, True
-        )
-        self.outputAlgiArmCommand = algiArmCommand(
-            self.algiArmSubsystem, SystemValues.ouputAlgiArmAngle, True
-        )
+        self.intakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, SystemValues.intakeCorralArmAngle, True)
+        self.specialIntakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, SystemValues.specialCorralIntakeArmAngle, True)
+        self.pickAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, SystemValues.pickAlgiArmAngle, True)
+        self.outputAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, SystemValues.ouputAlgiArmAngle, True)
 
         self.led_command_green = ledCommand(self.led_subsys, [0, 255, 0])
         self.led_command_blue = ledCommand(self.led_subsys, [0, 0, 255])
         self.led_command_red = ledCommand(self.led_subsys, [255, 0, 0])
-        self.led_command_purple = ledCommand(self.led_subsys, [255, 0, 255])
+        self.led_command_purple = ledCommand(self.led_subsys, [255,0,255])
         self.led_command_cyan = ledCommand(self.led_subsys, [0, 255, 255])
         self.led_command_yellow = ledCommand(self.led_subsys, [255, 255, 0])
 
-        self.led_command_flash_blue = LEDAnimationCommand(
-            self.led_subsys, [0, 0, 255], [0, 0, 0], 0.1
-        )
-        self.led_command_flash_white = LEDAnimationCommand(
-            self.led_subsys, [255, 255, 255], [0, 0, 0], 0.1
-        )
-        self.led_command_flash_purple = LEDAnimationCommand(
-            self.led_subsys, [255, 0, 255], [0, 0, 0], 0.1
-        )
-        self.led_command_flash_cyan = LEDAnimationCommand(
-            self.led_subsys, [0, 255, 255], [0, 0, 0], 0.1
-        )
+        self.led_command_flash_blue = LEDAnimationCommand(self.led_subsys, [0, 0, 255], [0, 0, 0], 0.1)
+        self.led_command_flash_white = LEDAnimationCommand(self.led_subsys, [255, 255, 255], [0,0,0], 0.1)
+        self.led_command_flash_purple = LEDAnimationCommand(self.led_subsys, [255, 0, 255], [0,0,0], 0.1)
+        self.led_command_flash_cyan = LEDAnimationCommand(self.led_subsys, [0, 255, 255], [0,0,0], 0.1)
 
         # Deafult Commands
         self.deafultAlgiIntakeCommand = algiIntakeCommand(
@@ -153,24 +123,19 @@ class RobotContainer:
 
         # Command Groups
         self.intakeAlgiCommand = ParallelDeadlineGroup(
-            self.intakeAlgiIntakeCommand,
-            self.pickAlgiArmCommand,
-            self.led_command_flash_blue,
+            self.intakeAlgiIntakeCommand, self.pickAlgiArmCommand, self.led_command_flash_blue
         )
         self.intakeCorralCommand = ParallelDeadlineGroup(
-            self.intakeCorralIntakeCommand,
-            self.intakeCorralArmCommand,
-            self.led_command_flash_purple,
+            self.intakeCorralIntakeCommand, self.intakeCorralArmCommand, self.led_command_flash_purple
         )
         self.specialCorralIntakeCommand = ParallelCommandGroup(
-            self.specialIntakeCorralCommand,
-            self.specialIntakeCorralArmCommand,
-            self.led_command_flash_white,
+            self.specialIntakeCorralCommand, self.specialIntakeCorralArmCommand, self.led_command_flash_white
         )
-
+        
         self.configure_button_bindings()
 
     def configure_button_bindings(self):
+
         # Driver Controller
 
         self.driverController.b().onTrue(
@@ -183,7 +148,7 @@ class RobotContainer:
             SlowSwerveDriveCommand(self.swerveSubsystem, self.driverController)
         )
 
-        # Operator Controller
+        #Operator Controller
 
         self.operatorController.b().toggleOnTrue(self.intakeAlgiCommand)
         self.operatorController.a().toggleOnTrue(self.intakeCorralCommand)
@@ -192,10 +157,9 @@ class RobotContainer:
         self.operatorController.x().toggleOnTrue(self.outputCorralIntakeCommand)
         self.operatorController.y().toggleOnTrue(self.outputAlgiIntakeCommand)
         self.operatorController.povDown().toggleOnTrue(self.specialCorralIntakeCommand)
-        self.operatorController.povUp().toggleOnTrue(
-            corralIntakeCommand(self.corralIntakeSubsystem, 0.2, True)
-        )
+        self.operatorController.povUp().toggleOnTrue(corralIntakeCommand(self.corralIntakeSubsystem, 0.2, True))
         self.operatorController.rightTrigger().toggleOnTrue(self.outputAlgiArmCommand)
+        
 
     def getYellowLEDCommand(self):
         return self.led_command_yellow
@@ -227,7 +191,7 @@ class RobotContainer:
         bezierPoints = PathPlannerPath.waypointsFromPoses(
             [
                 Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-                Pose2d(0, 0.5, Rotation2d.fromDegrees(0)),
+                Pose2d(0, 1, Rotation2d.fromDegrees(0)),
             ]
         )
         goalEndState = GoalEndState(0.0, Rotation2d.fromDegrees(45))
