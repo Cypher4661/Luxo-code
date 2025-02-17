@@ -13,7 +13,6 @@ class algiIntake(Subsystem):
             phoenix6.hardware.TalonFX(AlgiIntake.motor_id, ""), False
         )
         self.controller = phoenix6.controls.DutyCycleOut(0)
-        SmartDashboard.putData("Algi Intake", self)
 
     def config_motor(
         self, motor: phoenix6.hardware.TalonFX, inverted: bool

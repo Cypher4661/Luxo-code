@@ -4,6 +4,19 @@ import math
 from wpimath.trajectory import TrapezoidProfileRadians
 from rev import SparkMax
 
+class SystemValues:
+    l2ArmAngle = 52.5
+    l3ArmAngle = 135
+    intakeAlgiPower = 0.35
+    specialCorralIntakePower = -0.35
+    outputAlgiPower = -1
+    intakeCorralPower = 0.5
+    outputCorralPower = -0.225
+    intakeCorralArmAngle = 48.5
+    specialCorralIntakeArmAngle = 68.5
+    pickAlgiArmAngle = 71
+    ouputAlgiArmAngle = 17.5
+    
 
 class AlgiIntake:
     motor_id = 33
@@ -52,9 +65,9 @@ class AlgiSubsys:
     limit_id = 5
     motor1_type = SparkMax.MotorType.kBrushless
     motor2_type = SparkMax.MotorType.kBrushless
-    gear_ratio = 80
+    gear_ratio = 300
     convertion_factor = 360 / gear_ratio
-    kp = 0.015
+    kp = 0.02
     ki = 0.0
     kd = 0.01
     kf = 0.0

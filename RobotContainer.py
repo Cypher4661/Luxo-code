@@ -1,6 +1,6 @@
 from commands2 import Command
 from Constants import (
-    OIConstants,
+    OIConstants, SystemValues
 )
 from Subsytem.SwerveSubsystem import SwerveSubsystem
 from Subsytem.LEDSubsys import ledSubsys
@@ -66,27 +66,26 @@ class RobotContainer:
         self.algiArmSubsystem = algiArmSubsys()
 
         # Commands
-        self.specialIntakeHoldCorralCommand = corralIntakeCommand(self.corralIntakeSubsystem, 0.1, True)
-        self.specialIntakeCorralCommand = corralIntakeCommand(self.corralIntakeSubsystem, -0.5)
-        self.intakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, 0.35)
+        self.specialIntakeCorralCommand = corralIntakeCommand(self.corralIntakeSubsystem, SystemValues.specialCorralIntakePower)
+        self.intakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, SystemValues.intakeAlgiPower)
         self.holdAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, 0.01, True)
-        self.outTakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, -1)
+        self.outTakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, SystemValues.outputAlgiPower)
         self.intakeCorralIntakeCommand = corralIntakeCommand(
-            self.corralIntakeSubsystem, 0.5
+            self.corralIntakeSubsystem, SystemValues.intakeCorralPower
         )
 
-        self.outputAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, -0.2)
+        self.outputAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, SystemValues.outputAlgiPower)
         self.outputCorralIntakeCommand = corralIntakeCommand(
-            self.corralIntakeSubsystem, -0.225
+            self.corralIntakeSubsystem, SystemValues.outputCorralPower
         )
 
-        self.l3ArmCommand = corralArmCommand(self.corralArmSubsystem, 135, True)
-        self.l2ArmCommand = corralArmCommand(self.corralArmSubsystem, 55.5, True)
+        self.l3ArmCommand = corralArmCommand(self.corralArmSubsystem, SystemValues.l3ArmAngle, True)
+        self.l2ArmCommand = corralArmCommand(self.corralArmSubsystem, SystemValues.l2ArmAngle, True)
 
-        self.intakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 48.5)
-        self.specialIntakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, 68.5, True)
-        self.pickAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 69.25, True)
-        self.outputAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, 17.5, True)
+        self.intakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, SystemValues.intakeCorralArmAngle)
+        self.specialIntakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, SystemValues.specialCorralIntakeArmAngle, True)
+        self.pickAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, SystemValues.pickAlgiArmAngle, True)
+        self.outputAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, SystemValues.ouputAlgiArmAngle, True)
 
         self.led_command_green = ledCommand(self.led_subsys, [0, 255, 0])
         self.led_command_blue = ledCommand(self.led_subsys, [0, 0, 255])
@@ -94,6 +93,7 @@ class RobotContainer:
         self.led_command_yellow = ledCommand(self.led_subsys, [255, 255, 0])
 
         self.led_command_flash_blue = LEDAnimationCommand(self.led_subsys, [0,0,255], [0,0,0], 0.1)
+        self.led_command_flash_white = LEDAnimationCommand(self.led_subsys, [255,255,255], [0,0,0], 0.1)
 
         # Deafult Commands
         self.deafultAlgiIntakeCommand = algiIntakeCommand(
@@ -125,8 +125,8 @@ class RobotContainer:
         self.intakeCorralCommand = ParallelCommandGroup(
             self.intakeCorralIntakeCommand, self.intakeCorralArmCommand
         )
-        self.specialCorralIntakeCommand = ParallelDeadlineGroup(
-            self.specialIntakeCorralCommand, self.specialIntakeCorralArmCommand
+        self.specialCorralIntakeCommand = ParallelCommandGroup(
+            self.specialIntakeCorralCommand, self.specialIntakeCorralArmCommand, self.led_command_flash_white
         )
         
         self.configure_button_bindings()
