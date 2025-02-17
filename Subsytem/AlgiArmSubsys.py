@@ -26,7 +26,6 @@ class algiArmSubsys(Subsystem):
         self.input = wpilib.DigitalInput(AlgiSubsys.revcoder)
         self.absolute_encoder = wpilib.DutyCycleEncoder(self.input)
         self.rest_encoder()
-        SmartDashboard.putData("Algi Arm Subsystem", self)
 
     def motor_config(self, motor: rev.SparkMax, direction: bool) -> rev.SparkMax:
         config = rev.SparkMaxConfig()

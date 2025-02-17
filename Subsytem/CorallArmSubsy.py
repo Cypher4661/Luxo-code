@@ -18,7 +18,6 @@ class corralArmSubsys(Subsystem):
         self.controller = phoenix6.controls.MotionMagicVoltage(0)
         self.stopController = phoenix6.controls.VoltageOut(0)
         self.limit = wpilib.DigitalInput(CoralSubsys.limit_id)
-        SmartDashboard.putData("Corral Arm Subsystem", self)
         self.encoder_input = wpilib.DigitalInput(CoralSubsys.revcoder)
         self.absolute_encoder = DutyCycleEncoder(self.encoder_input)
         self.reset_encoder()

@@ -21,14 +21,14 @@ class corralIntakeCommand(Command):
         return super().initialize()
 
     def execute(self):
-        if self.controller and self.controller.getRightTriggerAxis() >= 0.2:
-            self.subsys.duty_motor(0.1)
+        if self.controller and self.controller.getRightTriggerAxis() >= 0.5:
+            self.subsys.duty_motor(0.2)
         else:
             self.subsys.duty_motor(self.power)
         return super().execute()
 
     def isFinished(self):
-        return not self.isDeafultCommand and self.subsys.get_motor_current() >= 35.5 
+        return not self.isDeafultCommand and self.subsys.get_motor_current() >= 40.5 
         return super().isFinished()
 
     def end(self, interrupted):
