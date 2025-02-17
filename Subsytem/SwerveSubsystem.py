@@ -118,8 +118,8 @@ class SwerveSubsystem(Subsystem):
             self.getCSpeed,  # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             lambda speed, feedforward: self.autoDrive(speed, feedforward),
             PPHolonomicDriveController(  # HolonomicPathFollowerConfig, this should likely live in your Constants class
-                PIDConstants(2, 0, 0),  # Translation PID constants
-                PIDConstants(0.75, 0, 0),  # Rotation PID constants
+                PIDConstants(1.5, 0, 0),  # Translation PID constants
+                PIDConstants(0.1, 0, 0),  # Rotation PID constants
             ),
             config,
             self.shouldFlipPath,
@@ -161,6 +161,7 @@ class SwerveSubsystem(Subsystem):
         self.odometer.resetPosition(self.getRotation2d(), module_positions, pose)
 
     def periodic(self) -> None:
+        print(self.getHeading())
         module_positions = (
             self.frontLeft.get_position(),
             self.frontRight.get_position(),

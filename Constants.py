@@ -52,9 +52,9 @@ class CoralSubsys:
     ks = 0.25
     kv = 0.12
     ka = 0.01
-    velocity = gearRatio*gearRatio
-    acceleration = gearRatio*gearRatio*2
-    jerk = gearRatio*gearRatio*20
+    velocity = 30
+    acceleration = 60
+    jerk = 600
     revcoder = 7
     encoder_offset = 0.582
 
