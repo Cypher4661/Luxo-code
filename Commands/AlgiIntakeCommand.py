@@ -3,9 +3,14 @@ from Subsytem.AlgiIntake import algiIntake
 from Constants import AlgiIntake
 from commands2.button import CommandXboxController
 
+
 class algiIntakeCommand(Command):
     def __init__(
-       self, subsys: algiIntake, power: float, isDeafultCommand: bool = False, controller:CommandXboxController = None
+        self,
+        subsys: algiIntake,
+        power: float,
+        isDeafultCommand: bool = False,
+        controller: CommandXboxController = None,
     ):
         self.power = power
         self.subsys = subsys
@@ -19,7 +24,7 @@ class algiIntakeCommand(Command):
 
     def execute(self):
         if self.controller and self.controller.getLeftTriggerAxis() >= 0.2:
-            self.subsys.duty_motor(0.2)
+            self.subsys.duty_motor(0.05)
         else:
             self.subsys.duty_motor(self.power)
         return super().execute()

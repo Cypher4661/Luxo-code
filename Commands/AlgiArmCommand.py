@@ -14,13 +14,13 @@ class algiArmCommand(Command):
         self.isDeafultCommand = isDeafultCommand
         super().__init__()
 
-    def initialize(self): 
+    def initialize(self):
         return super().initialize()
 
     def execute(self):
-        if(
-            self.subsys.at_limit() or
-            abs(self.subsys.get_current_degree() - self.angle) <= AlgiSubsys.deadband
+        if (
+            self.subsys.at_limit()
+            or abs(self.subsys.get_current_degree() - self.angle) <= AlgiSubsys.deadband
         ):
             self.subsys.stop()
         else:
@@ -35,6 +35,6 @@ class algiArmCommand(Command):
         )
         return super().isFinished()
 
-    def end(self, interrupted): 
+    def end(self, interrupted):
         self.subsys.stop()
         return super().end(interrupted)

@@ -10,7 +10,7 @@ class ledCommand(Command):
         self.addRequirements(self.subsys)
         super().__init__()
 
-    def initialize(self):        
+    def initialize(self):
         return super().initialize()
 
     def execute(self):
