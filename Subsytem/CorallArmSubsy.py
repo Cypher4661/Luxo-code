@@ -69,18 +69,17 @@ class corralArmSubsys(Subsystem):
         return motor
 
     def periodic(self):
-        self.reset_encoder()
         return super().periodic()
 
     def reset_encoder(self) -> None:
         pose = self.absolute_encoder.get() - CoralSubsys.encoder_offset
-        self.motor.set_position(pose)
+        self.motor.set_position(0)
 
     def at_limit(self) -> bool:
         return not self.limit.get()
 
     def motor_to_position(self, angle: float) -> None:
-        rot = self.angle_to_rotation(angle)
+        rot = self.angle_to_rotation(angle)*CoralSubsys.gearRatio
         self.motor.set_control(self.controller.with_position(rot))
 
     def stop(self) -> None:
@@ -94,7 +93,7 @@ class corralArmSubsys(Subsystem):
 
     def get_current_angle(self) -> float:
         angle = self.rotation_to_angle(self.motor.get_rotor_position().value_as_double)
-        return (self.absolute_encoder.get()-CoralSubsys.encoder_offset)*360
+        return angle
 
     def initSendable(self, builder: SendableBuilder) -> None:
         builder.addDoubleProperty(

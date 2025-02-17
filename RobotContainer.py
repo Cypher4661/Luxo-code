@@ -178,7 +178,7 @@ class RobotContainer:
     ) -> Command:
         path = PathPlannerPath(
             bezierPoints,
-            PathConstraints(3.0, 3.0, 2 * math.pi, 4 * math.pi),
+            PathConstraints(3.0, 3.0, 2 * math.pi, 2 * math.pi),
             None,
             goalEndState,
         )
@@ -190,11 +190,11 @@ class RobotContainer:
         self.swerveSubsystem.zeroHeading()
         bezierPoints = PathPlannerPath.waypointsFromPoses(
             [
-                Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-                Pose2d(0, 1, Rotation2d.fromDegrees(0)),
+                Pose2d(0, 0, Rotation2d.fromDegrees(45)),
+                Pose2d(1, 1, Rotation2d.fromDegrees(45)),
             ]
         )
-        goalEndState = GoalEndState(0.0, Rotation2d.fromDegrees(45))
+        goalEndState = GoalEndState(0.0, Rotation2d.fromDegrees(0))
         path_follower_command = self.create_path_command(bezierPoints, goalEndState)
         return path_follower_command
 
