@@ -95,8 +95,8 @@ class corralArmSubsys(Subsystem):
         angle = self.rotation_to_angle(self.motor.get_rotor_position().value_as_double)
         return angle
 
-    def initSendable(self, builder: SendableBuilder) -> None:
-        builder.addDoubleProperty(
-            "Current Arm Angle", self.get_current_angle, lambda x: None
-        )
-        return super().initSendable(builder)
+    # def initSendable(self, builder: SendableBuilder) -> None:
+    #     builder.addDoubleProperty(
+    #         "Current Arm Angle", self.get_current_angle, lambda x: None
+    #     )
+    #     return super().initSendable(builder)

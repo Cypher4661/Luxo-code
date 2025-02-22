@@ -1,5 +1,5 @@
 from wpimath.kinematics import SwerveDrive4Kinematics
-from wpimath.geometry import Translation2d
+from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 import math
 from wpimath.trajectory import TrapezoidProfileRadians
 from rev import SparkMax
@@ -12,11 +12,15 @@ class SystemValues:
     specialCorralIntakePower = -0.35
     outputAlgiPower = -1
     intakeCorralPower = 0.5
-    outputCorralPower = -0.225
-    intakeCorralArmAngle = 48.5
+    outputCorralPower = -0.2
+    intakeCorralArmAngle = 45.5
     specialCorralIntakeArmAngle = 68.5
     pickAlgiArmAngle = 71
-    ouputAlgiArmAngle = 17.5
+    ouputAlgiArmAngle = 20
+
+# class putOffsets:
+#     # 0 - L1, 1 - L2Right, 2 - L2Left, 3 - AlgeaBottom, 4 - L3Right, 5 - L3Left, 6 - AlgeaTop
+#     {Translation2d(0,0),Translation2d(0,0),Translation2d(0,0),Translation2d(0,0),Translation2d(0,0),Translation2d(0,0),Translation2d(0,0),Translation2d(0,0)}
 
 
 class AlgiIntake:
@@ -86,14 +90,9 @@ class led:
 
 
 class LimeLightConstants:
-    limelight_left_name = "limelight-left"
-    limelight_right_name = "limelight-right"
-    limelight_left_height = 0.33
-    limelight_right_height = 0.33
-    limelight_right_angle = 20
-    limelight_left_angle = 20
+    limelight_name = "limelight-luxo"
     april_tag_height = []
-
+    
 
 class ModuleConstants:
     driveKS = 0.56548

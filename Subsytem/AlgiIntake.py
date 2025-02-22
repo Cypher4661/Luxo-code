@@ -54,8 +54,8 @@ class algiIntake(Subsystem):
     def get_motor_current(self) -> float:
         return self.motor.get_stator_current().value_as_double
 
-    def initSendable(self, builder: SendableBuilder) -> None:
-        builder.addDoubleProperty(
-            "Rotor Velocity", self.get_motor_velocity, lambda x: None
-        )
-        return super().initSendable(builder)
+    # def initSendable(self, builder: SendableBuilder) -> None:
+    #     builder.addDoubleProperty(
+    #         "Rotor Velocity", self.get_motor_velocity, lambda x: None
+    #     )
+    #     return super().initSendable(builder)

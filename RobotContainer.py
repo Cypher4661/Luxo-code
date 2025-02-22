@@ -7,11 +7,13 @@ from Subsytem.LEDSubsys import ledSubsys
 from Commands.LEDCommand import ledCommand
 from Commands.CorallArmCommand import corralArmCommand
 from Commands.SlowSwerveDriveCommand import SlowSwerveDriveCommand
+from Commands.AutoAlign import AutoAlign
 from Commands.SwerveDriveCommand import SwerveDriveCommand
 from Commands.AlgiArmCommand import algiArmCommand
 from Commands.LEDAnimationComand import LEDAnimationCommand
 from Commands.AlgiIntakeCommand import algiIntakeCommand
 from Commands.CorralIntakeCommand import corralIntakeCommand
+from Commands.udiAuto import UdiAuto
 import commands2
 import commands2.cmd
 import commands2.button
@@ -23,7 +25,6 @@ from pathplannerlib.path import (
     Waypoint,
 )
 from pathplannerlib.auto import AutoBuilder
-from Subsytem.limelight import limelight
 from Subsytem.CorallArmSubsy import corralArmSubsys
 from Subsytem.AlgiArmSubsys import algiArmSubsys
 from Subsytem.AlgiIntake import algiIntake
@@ -31,16 +32,11 @@ from Subsytem.CorralIntake import corralIntake
 from wpimath.geometry import Pose2d, Rotation2d
 import math
 from commands2 import SequentialCommandGroup, ParallelCommandGroup, ParallelDeadlineGroup
-from cscore import CameraServer
 
 
 class RobotContainer:
     def __init__(self):
-        #camera
 
-        self.camera1 = CameraServer.startAutomaticCapture(0)
-        self.camera2 = CameraServer.startAutomaticCapture(1)
-        self.server = CameraServer.addSwitchedCamera("Switch Camera")
 
         # Random Data
         self.led_bool_enable = True
@@ -58,15 +54,14 @@ class RobotContainer:
         self.corralArmSubsystem = corralArmSubsys()
         self.swerveSubsystem = SwerveSubsystem()
         self.led_subsys = ledSubsys()
-        self.limelight = limelight()
-        self.left = self.limelight.get_left_limelight()
-        self.right = self.limelight.get_right_limelight()
         self.algiIntakeSubsystem = algiIntake()
         self.corralIntakeSubsystem = corralIntake()
         self.algiArmSubsystem = algiArmSubsys()
 
         self.configure_commands()
         self.configure_button_bindings()
+        
+        
 
     def configure_commands(self):
 
@@ -85,23 +80,28 @@ class RobotContainer:
 
         self.l3ArmCommand = corralArmCommand(self.corralArmSubsystem, SystemValues.l3ArmAngle, True)
         self.l2ArmCommand = corralArmCommand(self.corralArmSubsystem, SystemValues.l2ArmAngle, True)
+        self.l0ArmCommand = corralArmCommand(self.corralArmSubsystem, 0, True)
+
+        self.stopIntakeCorralIntakeCommand = corralIntakeCommand(
+            self.corralIntakeSubsystem, 0
+        )
 
         self.intakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, SystemValues.intakeCorralArmAngle, True)
         self.specialIntakeCorralArmCommand = corralArmCommand(self.corralArmSubsystem, SystemValues.specialCorralIntakeArmAngle, True)
         self.pickAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, SystemValues.pickAlgiArmAngle, True)
         self.outputAlgiArmCommand = algiArmCommand(self.algiArmSubsystem, SystemValues.ouputAlgiArmAngle, True)
 
-        self.led_command_green = ledCommand(self.led_subsys, [0, 255, 0])
-        self.led_command_blue = ledCommand(self.led_subsys, [0, 0, 255])
-        self.led_command_red = ledCommand(self.led_subsys, [255, 0, 0])
-        self.led_command_purple = ledCommand(self.led_subsys, [255,0,255])
-        self.led_command_cyan = ledCommand(self.led_subsys, [0, 255, 255])
-        self.led_command_yellow = ledCommand(self.led_subsys, [255, 255, 0])
+        self.led_command_green = ledCommand(self.led_subsys, [0, 200, 0])
+        self.led_command_blue = ledCommand(self.led_subsys, [0, 0, 200])
+        self.led_command_red = ledCommand(self.led_subsys, [200, 0, 0])
+        self.led_command_purple = ledCommand(self.led_subsys, [200,0,200])
+        self.led_command_cyan = ledCommand(self.led_subsys, [0, 200, 200])
+        self.led_command_yellow = ledCommand(self.led_subsys, [200, 0, 200])
 
-        self.led_command_flash_blue = LEDAnimationCommand(self.led_subsys, [0, 0, 255], [0, 0, 0], 0.1)
-        self.led_command_flash_white = LEDAnimationCommand(self.led_subsys, [255, 255, 255], [0,0,0], 0.1)
-        self.led_command_flash_purple = LEDAnimationCommand(self.led_subsys, [255, 0, 255], [0,0,0], 0.1)
-        self.led_command_flash_cyan = LEDAnimationCommand(self.led_subsys, [0, 255, 255], [0,0,0], 0.1)
+        self.led_command_flash_blue = LEDAnimationCommand(self.led_subsys, [0, 0, 200], [0, 0, 0], 0.1)
+        self.led_command_flash_white = LEDAnimationCommand(self.led_subsys, [200, 200, 200], [0,0,0], 0.1)
+        self.led_command_flash_purple = LEDAnimationCommand(self.led_subsys, [200, 0, 200], [0,0,0], 0.1)
+        self.led_command_flash_cyan = LEDAnimationCommand(self.led_subsys, [0, 200, 200], [0,0,0], 0.1)
 
         # Deafult Commands
         self.deafultAlgiIntakeCommand = algiIntakeCommand(
@@ -150,17 +150,26 @@ class RobotContainer:
         self.driverController.a().toggleOnTrue(
             SlowSwerveDriveCommand(self.swerveSubsystem, self.driverController)
         )
+        self.driverController.x().onTrue(
+            AutoAlign(self.swerveSubsystem, self.driverController)
+        )
 
         #Operator Controller
 
         self.operatorController.b().toggleOnTrue(self.intakeAlgiCommand)
         self.operatorController.a().toggleOnTrue(self.intakeCorralCommand)
+        self.operatorController.povLeft().toggleOnTrue(self.stopIntakeCorralIntakeCommand)
         self.operatorController.rightBumper().toggleOnTrue(self.l3ArmCommand)
         self.operatorController.leftBumper().toggleOnTrue(self.l2ArmCommand)
+
+        self.driverController.rightBumper().toggleOnTrue(self.l3ArmCommand)
+        self.driverController.leftBumper().toggleOnTrue(self.l2ArmCommand)
+        
         self.operatorController.x().toggleOnTrue(self.outputCorralIntakeCommand)
         self.operatorController.y().toggleOnTrue(self.outputAlgiIntakeCommand)
         self.operatorController.povDown().toggleOnTrue(self.specialCorralIntakeCommand)
         self.operatorController.povUp().toggleOnTrue(corralIntakeCommand(self.corralIntakeSubsystem, 0.2, True))
+        self.operatorController.povRight().toggleOnTrue(self.l0ArmCommand)
         self.operatorController.rightTrigger().toggleOnTrue(self.outputAlgiArmCommand)
         
 
@@ -187,8 +196,11 @@ class RobotContainer:
         )
         path_follower_command: Command = AutoBuilder.followPath(path)
         return path_follower_command
-
+ 
     def get_autonomous_command(self) -> Command:
+        return UdiAuto(self.swerveSubsystem)
+ 
+    def get_autonomous_command1(self) -> Command:
         self.swerveSubsystem.resetOdometry(Pose2d(0, 0, Rotation2d.fromDegrees(0)))
         self.swerveSubsystem.zeroHeading()
         bezierPoints = PathPlannerPath.waypointsFromPoses(
@@ -199,24 +211,4 @@ class RobotContainer:
         )
         goalEndState = GoalEndState(0.0, Rotation2d.fromDegrees(0))
         path_follower_command = self.create_path_command(bezierPoints, goalEndState)
-        return path_follower_command
-
-    def april_tag_path(
-        self, april_light: limelight, offset: list[float] = [0, 0, 0]
-    ) -> Command:
-        april_pose = self.limelight.get_target_position(april_light)
-        self.swerveSubsystem.resetOdometry(Pose2d(0, 0, Rotation2d.fromDegrees(0)))
-        bezirePoints = PathPlannerPath.waypointsFromPoses(
-            [
-                Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-                Pose2d(
-                    april_pose[0] + offset[0],
-                    april_pose[1] + offset[1],
-                    april_pose[2] + offset[2],
-                ),
-            ]
-        )
-        path_follower_command = self.create_path_command(
-            bezirePoints, GoalEndState(0, Rotation2d.fromDegrees(april_pose[2]))
-        )
         return path_follower_command
