@@ -142,8 +142,8 @@ class SwerveSubsystem(Subsystem):
         self.gyro.setAngleAdjustment(angle)
 
     def getHeading(self) -> float:
-        angle = self.gyro.getYaw() % 360
-        return 360 - angle
+        angle = self.gyro.getYaw()
+        return 360- angle
 
     def getRotation2d(self) -> Rotation2d:
         return Rotation2d.fromDegrees(self.getHeading())
@@ -161,7 +161,7 @@ class SwerveSubsystem(Subsystem):
         self.odometer.resetPosition(self.getRotation2d(), module_positions, pose)
 
     def periodic(self) -> None:
-        print(self.getHeading())
+        # print(self.getHeading())
         module_positions = (
             self.frontLeft.get_position(),
             self.frontRight.get_position(),
@@ -186,7 +186,8 @@ class SwerveSubsystem(Subsystem):
         ySpeed = ySpeed if abs(ySpeed) > OIConstants.kStickDriftLY else 0.0
         tSpeed = tSpeed if abs(tSpeed) > OIConstants.kStickDriftRX else 0.0
         cSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(
-            xSpeed, ySpeed, tSpeed, self.getRotation2d()
+            xSpeed, ySpeed, tSpeed, self.getRotation2d() if fieldOriented else 
+            ChassisSpeeds(xSpeed, ySpeed, tSpeed)
         )
 
         moduleState = DriveConstants.kDriveKinematics.toSwerveModuleStates(

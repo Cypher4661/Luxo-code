@@ -65,7 +65,7 @@ class algiArmSubsys(Subsystem):
         self.encoder.setPosition(pose * 360)
         encoder = self.motor2.getEncoder()
         encoder.setPosition(pose * 360)
-        SmartDashboard.putNumber("alge arm init angle", pose)
+        # SmartDashboard.putNumber("alge arm init angle", pose)
 
     def at_limit(self) -> bool:
         return not self.limit.get()
@@ -91,16 +91,16 @@ class algiArmSubsys(Subsystem):
     def get_current_degree(self) -> float:
         return self.encoder.getPosition()
 
-    def initSendable(self, builder: SendableBuilder) -> None:
-        builder.addDoubleProperty(
-            "Alge Arm Angle", self.get_current_degree, lambda x: None
-        )
-        builder.addDoubleProperty(
-            "absolute_encoder ", self.absolute_encoder.get, lambda x: None
-        )
+    # def initSendable(self, builder: SendableBuilder) -> None:
+    #     builder.addDoubleProperty(
+    #         "Alge Arm Angle", self.get_current_degree, lambda x: None
+    #     )
+    #     builder.addDoubleProperty(
+    #         "absolute_encoder ", self.absolute_encoder.get, lambda x: None
+    #     )
 
-        builder.addBooleanProperty(
-            "absolute_encoder is con", self.absolute_encoder.isConnected, lambda x: None
-        )
+    #     builder.addBooleanProperty(
+    #         "absolute_encoder is con", self.absolute_encoder.isConnected, lambda x: None
+    #     )
 
-        return super().initSendable(builder)
+    #     return super().initSendable(builder)
