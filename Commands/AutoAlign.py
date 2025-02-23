@@ -47,8 +47,8 @@ class AutoAlign(Command):
     def execute(self):
         robot_pose = self.getRobot()
         if int(self.light.getNumber("tid", 0)) != 0 and robot_pose is not None:
-            robotToTag = robot_pose.translation()
-            offset = self.l3LeftOffset.rotateBy(self.TAG_ANGLE[int(self.light.getNumber("tid", 0))].rotateBy(Rotation2d.fromDegrees(180)))
+            robotToTag = robot_pose.translation().rotateBy(Rotation2d.fromDegrees(self.subsys.getHeading()))
+            offset = self.l3LeftOffset.rotateBy(self.TAG_ANGLE[int(self.light.getNumber("tid", 0))])
             robotToTarget:Translation2d = robotToTag + offset
             if robotToTarget is not None:
                 self.subsys.drive(
@@ -56,8 +56,6 @@ class AutoAlign(Command):
                     robotToTarget.Y(),
                     self.controller.getRightX(),
                 )
-                print("DIST: " ,robotToTarget.norm())
-                print("ANGLE: " ,robotToTarget.angle())
 
 
     def getRobot(self) -> Pose2d | None:
