@@ -1,3 +1,4 @@
+import wpilib
 from rev import SparkMax, SparkLowLevel, SparkMaxConfig, ClosedLoopConfig
 from phoenix6.hardware.cancoder import CANcoder
 from wpimath.geometry import Rotation2d
@@ -8,11 +9,13 @@ from Constants import (
     DriveConstants,
 )
 from util.onboard_module_state import OnboardModuleState
+from wpiutil import Sendable
 
 
-class SwerveModule:
+class SwerveModule(Sendable):
     def __init__(
         self,
+        name,
         driveMotorId: int,
         turningMotorId: int,
         driveMotorReversed: bool,
@@ -21,6 +24,7 @@ class SwerveModule:
         absoluteEncoderOffset: float,
         absoluteEncoderReversed: bool,
     ) -> None:
+        self.name = name
         self.feed_forward = SimpleMotorFeedforwardMeters(
             ModuleConstants.driveKS, ModuleConstants.driveKV, ModuleConstants.driveKA
         )
@@ -149,3 +153,8 @@ class SwerveModule:
                 desired_state.speed,
                 SparkLowLevel.ControlType.kVelocity,
             )
+
+    def initSendable(self, builder):
+        builder.addDoubleProperty(self.name + '/angle',self.get_angle,lambda x: None)
+        builder.addDoubleProperty(self.name + '/velocity', self.driveEncoder.getVelocity, lambda x: None)
+        builder.addDoubleProperty(self.name + '/position', self.driveEncoder.getPosition, lambda x: None)

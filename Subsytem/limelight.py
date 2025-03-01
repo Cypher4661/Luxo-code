@@ -1,49 +1,52 @@
 from ntcore import NetworkTableInstance
 from commands2 import Subsystem
-from pathplannerlib.pathfinders import Tuple
+from wpiutil import SendableBuilder
+
 from Constants import LimeLightConstants
 import math
 from ntcore import NetworkTable
-
+from wpimath.geometry import Pose2d, Translation2d, Rotation2d
+from wpimath.estimator import SwerveDrive4PoseEstimator
+import wpilib
+from collections.abc import Callable
 
 class limelight(Subsystem):
-    def __init__(self) -> None:
-        self.light_left = NetworkTableInstance.getDefault().getTable(
-            LimeLightConstants.limelight_left_name
-        )
-        self.light_right = NetworkTableInstance.getDefault().getTable(
-            LimeLightConstants.limelight_right_name
-        )
+    def __init__(self, poseEstimator: SwerveDrive4PoseEstimator, getVelocity: Callable[[], float]) -> None:
+        self.ntTable = NetworkTableInstance.getDefault().getTable(LimeLightConstants.limelight_name)
+        self.field2d = wpilib._wpilib.Field2d()
+        self.poseEstimator = poseEstimator
+        self.getVelocity = getVelocity
+        self.validCount = 0
+        super().__init__()
 
-    def getX(self, light: NetworkTable) -> float:
-        return light.getNumber("tx", 999)
 
-    def getY(self, light: NetworkTable) -> float:
-        return light.getNumber("ty", 999)
+    def id(self) -> int:
+        return self.ntTable.getNumber("tid", -1)
 
-    def distance(self, light, l_height, t_height, angle) -> float:
-        angle_to_goal_degrees = angle + self.getY(light)
-        angle_to_goal_radians = math.radians(angle_to_goal_degrees)
-        distance = (t_height - l_height) / math.tan(angle_to_goal_radians)
-        return distance
+    def inView(self) -> bool:
+        return bool(self.ntTable.getNumber("tv", 0))
 
-    def id(self, light: NetworkTable) -> int:
-        return light.getNumber("tid", 999)
+    def getPose(self):
+        if self.inView() and abs(self.getVelocity() < 0.2):
+            # data - x,y,x,roll,pitch,yaw,latency,tag count, tag span, avg tag distance, avg tag area
+            data = self.ntTable.getNumberArray("botpose_wpiblue", [999] * 11)
+            if data[0] != 999:
+                return Pose2d(Translation2d(data[0], data[1]), Rotation2d.fromDegrees(data[5])), data[6]
+        return None, 0
 
-    def inView(self, light: NetworkTable) -> bool:
-        return bool(light.getNumber("tv", 0))
+    def periodic(self) -> None:
+        pose, latency = self.getPose()
+        if pose:
+            self.field2d.setRobotPose(pose)
+            self.validCount = self.validCount + 1
+            if self.validCount > 2:
+                self.poseEstimator.addVisionMeasurement(pose, latency)
+        else:
+            self.validCount = 0
 
-    def get_right_limelight(self) -> NetworkTable:
-        return self.light_right
+    def initSendable(self, builder: SendableBuilder) -> None:
+        builder.addBooleanProperty('InView', self.inView, lambda x : None)
+        builder.addDoubleProperty('valid count', lambda : self.validCount, lambda x : None)
+        wpilib.SmartDashboard.putData('Limelight/Field', self.field2d)
 
-    def get_left_limelight(self) -> NetworkTable:
-        return self.light_left
 
-    def get_target_position(self, light: NetworkTable) -> Tuple:
-        april_pose = light.getNumberArray("camerapose_targetspace", [999] * 6)
-        if april_pose[0] == 999:
-            return (0, 0, 0)
-        x = april_pose[0]
-        y = april_pose[2]
-        yaw = april_pose[4]
-        return (x, y, yaw)

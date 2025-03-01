@@ -1,13 +1,13 @@
 from commands2 import Command
-from Subsytem.AlgiIntake import algiIntake
-from Constants import AlgiIntake
+from Subsytem.AlgaeIntakeSubsystem import AlgaeIntakeSubsystem
+from Constants import AlgaeIntake
 from commands2.button import CommandXboxController
 
 
-class algiIntakeCommand(Command):
+class algaeIntakeCommand(Command):
     def __init__(
         self,
-        subsys: algiIntake,
+        subsys: AlgaeIntakeSubsystem,
         power: float,
         isDeafultCommand: bool = False,
         controller: CommandXboxController = None,
@@ -20,19 +20,16 @@ class algiIntakeCommand(Command):
         super().__init__()
 
     def initialize(self):
-        return super().initialize()
+        pass
 
     def execute(self):
         if self.controller and self.controller.getLeftTriggerAxis() >= 0.2:
-            self.subsys.duty_motor(0.05)
+            self.subsys.setPower(AlgaeIntake.keepPower)
         else:
-            self.subsys.duty_motor(self.power)
-        return super().execute()
+            self.subsys.setPower(self.power)
 
     def isFinished(self):
-        return not self.isDeafultCommand and self.subsys.get_motor_current() >= 15.5
-        return super().isFinished()
+        return not self.isDeafultCommand and self.subsys.get_motor_current() >= AlgaeIntake.algaeCollectedAmper
 
     def end(self, interrupted):
         self.subsys.stop()
-        return super().end(interrupted)

@@ -4,146 +4,77 @@ from wpimath.kinematics import SwerveDrive4Kinematics, ChassisSpeeds
 from commands2 import Subsystem
 
 from wpimath.estimator import SwerveDrive4PoseEstimator
+from wpiutil import SendableBuilder
+
 from Constants import DriveConstants, OIConstants, ModuleConstants
 from Subsytem.SwerveModule import SwerveModule
 from navx import AHRS
-from pathplannerlib.config import (
-    RobotConfig,
-    PIDConstants,
-    ModuleConfig,
-)
-from pathplannerlib.controller import PPHolonomicDriveController
-from pathplannerlib.auto import AutoBuilder
 import wpilib
-from wpimath.system.plant import DCMotor
 
 
 class SwerveSubsystem(Subsystem):
     def __init__(self) -> None:
-        self.autoCSpeed: ChassisSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(
-            0, 0, 0, Rotation2d.fromDegrees(0)
-        )
-        self.special_drive = False
-
         self.gyro = AHRS.create_spi()
+        self.gyro.configureVelocity(True, False, False, False)
 
-        self.xLimiter = filter.SlewRateLimiter(
-            DriveConstants.kTeleDriveMaxAccelerationUnitsPerSecond
-        )
-        self.yLimiter = filter.SlewRateLimiter(
-            DriveConstants.kTeleDriveMaxAccelerationUnitsPerSecond
-        )
-        self.tLimiter = filter.SlewRateLimiter(
-            DriveConstants.kTeleDriveMaxAngularAccelerationUnitsPerSecond
-        )
-
-        self.frontLeft: SwerveModule = SwerveModule(
-            DriveConstants.kFrontLeftDriveMotorPort,
-            DriveConstants.kFrontLeftTurningMotorPort,
-            DriveConstants.kFrontLeftDriveEncoderReversed,
-            DriveConstants.kFrontLeftTurningEncoderReversed,
-            DriveConstants.kFrontLeftDriveAbsoluteEncoderPort,
-            DriveConstants.kFrontLeftDriveAbsoluteEncoderOffset,
-            DriveConstants.kFrontLeftDriveAbsoluteEncoderReversed,
-        )
-
-        self.frontRight: SwerveModule = SwerveModule(
-            DriveConstants.kFrontRightDriveMotorPort,
-            DriveConstants.kFrontRightTurningMotorPort,
-            DriveConstants.kFrontRightDriveEncoderReversed,
-            DriveConstants.kFrontRightTurningEncoderReversed,
-            DriveConstants.kFrontRightDriveAbsoluteEncoderPort,
-            DriveConstants.kFrontRightDriveAbsoluteEncoderOffset,
-            DriveConstants.kFrontRightDriveAbsoluteEncoderReversed,
-        )
-
-        self.backLeft: SwerveModule = SwerveModule(
-            DriveConstants.kBackLeftDriveMotorPort,
-            DriveConstants.kBackLeftTurningMotorPort,
-            DriveConstants.kBackLeftDriveEncoderReversed,
-            DriveConstants.kBackLeftTurningEncoderReversed,
-            DriveConstants.kBackLeftDriveAbsoluteEncoderPort,
-            DriveConstants.kBackLeftDriveAbsoluteEncoderOffset,
-            DriveConstants.kBackLeftDriveAbsoluteEncoderReversed,
-        )
-
-        self.backRight: SwerveModule = SwerveModule(
-            DriveConstants.kBackRightDriveMotorPort,
-            DriveConstants.kBackRightTurningMotorPort,
-            DriveConstants.kBackRightDriveEncoderReversed,
-            DriveConstants.kBackRightTurningEncoderReversed,
-            DriveConstants.kBackRightDriveAbsoluteEncoderPort,
-            DriveConstants.kBackRightDriveAbsoluteEncoderOffset,
-            DriveConstants.kBackRightDriveAbsoluteEncoderReversed,
-        )
+        self.modules = [
+            SwerveModule('FronLeft',
+                DriveConstants.kFrontLeftDriveMotorPort,
+                DriveConstants.kFrontLeftTurningMotorPort,
+                DriveConstants.kFrontLeftDriveEncoderReversed,
+                DriveConstants.kFrontLeftTurningEncoderReversed,
+                DriveConstants.kFrontLeftDriveAbsoluteEncoderPort,
+                DriveConstants.kFrontLeftDriveAbsoluteEncoderOffset,
+                DriveConstants.kFrontLeftDriveAbsoluteEncoderReversed
+            ),
+            SwerveModule('FrontRight',
+                DriveConstants.kFrontRightDriveMotorPort,
+                DriveConstants.kFrontRightTurningMotorPort,
+                DriveConstants.kFrontRightDriveEncoderReversed,
+                DriveConstants.kFrontRightTurningEncoderReversed,
+                DriveConstants.kFrontRightDriveAbsoluteEncoderPort,
+                DriveConstants.kFrontRightDriveAbsoluteEncoderOffset,
+                DriveConstants.kFrontRightDriveAbsoluteEncoderReversed,
+            ),
+            SwerveModule('BackLeft',
+                DriveConstants.kBackLeftDriveMotorPort,
+                DriveConstants.kBackLeftTurningMotorPort,
+                DriveConstants.kBackLeftDriveEncoderReversed,
+                DriveConstants.kBackLeftTurningEncoderReversed,
+                DriveConstants.kBackLeftDriveAbsoluteEncoderPort,
+                DriveConstants.kBackLeftDriveAbsoluteEncoderOffset,
+                DriveConstants.kBackLeftDriveAbsoluteEncoderReversed,
+            ),
+            SwerveModule('BackRight',
+                DriveConstants.kBackRightDriveMotorPort,
+                DriveConstants.kBackRightTurningMotorPort,
+                DriveConstants.kBackRightDriveEncoderReversed,
+                DriveConstants.kBackRightTurningEncoderReversed,
+                DriveConstants.kBackRightDriveAbsoluteEncoderPort,
+                DriveConstants.kBackRightDriveAbsoluteEncoderOffset,
+                DriveConstants.kBackRightDriveAbsoluteEncoderReversed,
+            )]
         self.odometer = SwerveDrive4PoseEstimator(
             DriveConstants.kDriveKinematics,
             self.getRotation2d(),
-            (
-                self.frontLeft.get_position(),
-                self.frontRight.get_position(),
-                self.backLeft.get_position(),
-                self.backRight.get_position(),
-            ),
+            (m.get_position() for m in self.modules),
             Pose2d(0, 0, Rotation2d(0)),
         )
-        config = RobotConfig(
-            54.0,
-            9.75,
-            ModuleConfig(
-                ModuleConstants.kWheelDiameterMeters,
-                DriveConstants.kPhysicalMaxSpeedMetersPerSecond,
-                1.0,
-                DCMotor(
-                    12,
-                    22.68,
-                    53.25,
-                    1.5,
-                    DriveConstants.kPhysicalMaxAngularSpeedRadiansPerSecond,
-                ),
-                40.0,
-                1,
-            ),
-            [
-                Translation2d(75.5 / 2, 75.5 / 2),
-                Translation2d(75.5 / 2, 75.5 / 2),
-                Translation2d(75.5 / 2, 75.5 / 2),
-                Translation2d(75.5 / 2, 75.5 / 2),
-            ],
-            DriveConstants.kTrackWidth,
-        )
-        AutoBuilder.configure(
-            self.getPose,  # Robot pose supplier
-            self.resetOdometry,  # Method to reset odometry (will be called if your auto has a starting pose)
-            self.getCSpeed,  # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            lambda speed, feedforward: self.autoDrive(speed, feedforward),
-            PPHolonomicDriveController(  # HolonomicPathFollowerConfig, this should likely live in your Constants class
-                PIDConstants(2, 0, 0),  # Translation PID constants
-                PIDConstants(0.125, 0.1, 0.1),  # Rotation PID constants
-            ),
-            config,
-            self.shouldFlipPath,
-            self,
-        )
-
-    def shouldFlipPath(self):
-        # Boolean supplier that controls when the path will be mirrored for the red alliance
-        # This will flip the path being followed to the red side of the field.
-        # THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-        return False
-        return wpilib.DriverStation.getAlliance() == wpilib.DriverStation.Alliance.kRed
+        self.field2d = wpilib._wpilib.Field2d()
+        super().__init__()
 
     def zeroHeading(self) -> None:
         self.gyro.reset()
         self.gyro.setAngleAdjustment(0)
+        self.resetOdometry(self.getPose())
 
     def autoHeading(self, angle: float) -> None:
-        self.zeroHeading()
+        self.gyro.reset()
         self.gyro.setAngleAdjustment(angle)
+        self.resetOdometry(self.getPose())
 
     def getHeading(self) -> float:
-        angle = self.gyro.getYaw()
-        return 360- angle
+        return self.gyro.getFusedHeading()
 
     def getRotation2d(self) -> Rotation2d:
         return Rotation2d.fromDegrees(self.getHeading())
@@ -152,32 +83,21 @@ class SwerveSubsystem(Subsystem):
         return self.odometer.getEstimatedPosition()
 
     def resetOdometry(self, pose: Pose2d) -> None:
-        module_positions = (
-            self.frontLeft.get_position(),
-            self.frontRight.get_position(),
-            self.backLeft.get_position(),
-            self.backRight.get_position(),
-        )
-        self.odometer.resetPosition(self.getRotation2d(), module_positions, pose)
+        self.odometer.resetPosition(self.getRotation2d(), self.getModulesPosition(), pose)
+
+    def getModulesPosition(self) :
+        return (m.get_position() for m in self.modules)
 
     def periodic(self) -> None:
-        # print(self.getHeading())
-        module_positions = (
-            self.frontLeft.get_position(),
-            self.frontRight.get_position(),
-            self.backLeft.get_position(),
-            self.backRight.get_position(),
-        )
-        self.odometer.update(self.getRotation2d(), module_positions)
+        self.odometer.update(self.getRotation2d(), self.getModulesPosition())
+        self.field2d.setRobotPose(self.getPose())
 
     def setModuleStates(self, desiredStates) -> None:
         SwerveDrive4Kinematics.desaturateWheelSpeeds(
             desiredStates, DriveConstants.swerve_max_speed
         )
-        self.frontLeft.setDesiredState(desiredStates[3], True)
-        self.frontRight.setDesiredState(desiredStates[2], True)
-        self.backLeft.setDesiredState(desiredStates[1], True)
-        self.backRight.setDesiredState(desiredStates[0], True)
+        for i in range(len(self.modules)):
+            self.modules[i].setDesiredState(desiredStates[i], True)
 
     def drive(
         self, xSpeed: float, ySpeed: float, tSpeed: float, fieldOriented: bool = True
@@ -203,19 +123,10 @@ class SwerveSubsystem(Subsystem):
         self.setModuleStates(moduleState)
 
     def getCSpeed(self) -> ChassisSpeeds:
-        module_states = (
-            self.frontLeft.getState(),
-            self.frontRight.getState(),
-            self.backRight.getState(),
-            self.backLeft.getState(),
-        )
+        module_states = (m.getState() for m in self.modules)
         return DriveConstants.kDriveKinematics.toChassisSpeeds(module_states)
 
-    def change_drive(self, switch: bool):
-        self.special_drive = switch
+    def initSendable(self, builder: SendableBuilder) -> None:
+        builder.addDoubleProperty('Gyro', self.getHeading, lambda x: None)
+        wpilib.SmartDashboard.putData('Field', self.field2d)
 
-    def check_module_angle(self) -> None:
-        self.frontLeft.reset_to_absolute()
-        self.frontRight.reset_to_absolute()
-        self.backLeft.reset_to_absolute()
-        self.backRight.reset_to_absolute()
