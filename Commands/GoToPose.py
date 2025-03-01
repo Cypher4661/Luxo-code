@@ -24,21 +24,20 @@ class GoToPose(Command):
         self.targetReached = False if self.pose else True
 
     def execute(self):
+        # stop if driver is driving
         if (abs(self.controller.getLeftY()) > 0.1 or
            abs(self.controller.getLeftX()) > 0.1 or
            abs(self.controller.getRightX()()) > 0.1):
             self.targetReached = True
-            return
-        if self.pose:
+        elif self.pose:
             pose = self.subsys.getPose()
             error = self.pose.relativeTo(pose)
             t = error.translation()
-            x = t.x * self.driveKp
-            y = t.y * self.driveKp
-            r = error.rotation().degrees()
-            omega = r * self.omegaKp
-            self.targetReached = abs(t.x) < 0.02 and abs(t.y) < 0.02 and abs(r) < 3
-            self.subsys.setSpeeds(ChassisSpeeds(x, y, omega), correctColor=False)
+            x = t.x
+            y = t.y
+            deg = error.rotation().degrees()
+            self.targetReached = abs(x) < 0.02 and abs(y) < 0.02 and abs(deg) < 3
+            self.subsys.setSpeeds(ChassisSpeeds(x*GoToPose.driveKp, y*GoToPose.driveKp, deg*GoToPose.omegaKp), correctColor=False)
 
     def isFinished(self) -> bool:
         return self.targetReached
