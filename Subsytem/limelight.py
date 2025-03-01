@@ -26,6 +26,11 @@ class limelight(Subsystem):
     def inView(self) -> bool:
         return bool(self.ntTable.getNumber("tv", 0))
 
+    def getTagId(self):
+        if self.inView() and self.validCount > 2:
+            return self.id()
+        return -1
+
     def getPose(self):
         if self.inView() and abs(self.getVelocity() < 0.2):
             # data - x,y,x,roll,pitch,yaw,latency,tag count, tag span, avg tag distance, avg tag area

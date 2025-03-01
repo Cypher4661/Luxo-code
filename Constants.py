@@ -9,15 +9,16 @@ from rev import SparkMax
 class SystemValues:
     l2ArmAngle = 52.5
     l3ArmAngle = 135
-    intakeAlgiPower = 0.35
+    intakeAlgaePower = 0.35
     specialCorralIntakePower = -0.35
-    outputAlgiPower = -1
+    outputAlgaePower = -1
     intakeCorralPower = 0.5
     outputCorralPower = -0.2
     intakeCorralArmAngle = 45.5
     specialCorralIntakeArmAngle = 68.5
-    pickAlgiArmAngle = 71
-    ouputAlgiArmAngle = 20
+    pickAlgaeArmAngle = 71
+    ouputAlgaeArmAngle = 20
+
 
 # class putOffsets:
 #     # 0 - L1, 1 - L2Right, 2 - L2Left, 3 - AlgeaBottom, 4 - L3Right, 5 - L3Left, 6 - AlgeaTop
@@ -132,23 +133,31 @@ class LimeLightConstants:
     RIGHT_L3_OFFSET = 0.33 - LEFT_L3_OFFSET
     BACK_L3_OFFSET = -0.43
 
-    def getTagTranslation(self, tagId : int) -> Translation2d:
+    def getTagTranslation(tagId : int) -> Translation2d:
         return Translation2d(LimeLightConstants.april_tag_data[tagId - 1][1],
                       LimeLightConstants.april_tag_data[tagId - 1][2])
-    def getTagAngle(self, tagId: int)->float:
+
+    def getTagAngle(tagId: int)->float:
         return LimeLightConstants.april_tag_data[tagId-1][3]
-    def getTagPose(self, tagId: int) -> Pose2d:
-        return Pose2d(self.getTagTranslation(tagId),Rotation2d.fromDegrees(self.getTagAngle(tagId)))
-    def getTagRelativePositon(self,tagId: int,x: float,y: float) -> Pose2d:
-        tagTranslation = self.getTagTranslation(tagId)
-        angle = self.getTagAngle(tagId)
+
+    def getTagPose(tagId: int) -> Pose2d:
+        return Pose2d(LimeLightConstants.getTagTranslation(tagId),
+                      Rotation2d.fromDegrees(LimeLightConstants.getTagAngle(tagId)))
+
+    def getTagRelativePosition(tagId: int,x: float,y: float) -> Pose2d:
+        tagTranslation = LimeLightConstants.getTagTranslation(tagId)
+        angle = LimeLightConstants.getTagAngle(tagId)
         r = Translation2d(x,y).rotateBy(Rotation2d.fromDegrees(angle))
         return Pose2d(tagTranslation + r, Rotation2d.fromDegrees(wpimath.inputModulus(180+angle,-180,180)))
 
-    def getLeftL3Position(self, tagId:int) -> Pose2d:
-        return self.getTagRelativePositon(tagId,self.BACK_L3_OFFSET, self.LEFT_L3_OFFSET)
-    def getRightL3Position(self, tagId:int) -> Pose2d:
-        return self.getTagRelativePositon(tagId,self.BACK_L3_OFFSET, self.RIGHT_L3_OFFSET)
+    def getLeftL3Position(tagId:int) -> Pose2d:
+        return LimeLightConstants.getTagRelativePosition(tagId,
+                                                        LimeLightConstants.BACK_L3_OFFSET,
+                                                        LimeLightConstants.LEFT_L3_OFFSET)
+    def getRightL3Position(tagId:int) -> Pose2d:
+        return LimeLightConstants.getTagRelativePosition(tagId,
+                                                        LimeLightConstants.BACK_L3_OFFSET,
+                                                        LimeLightConstants.RIGHT_L3_OFFSET)
 
 
 class ModuleConstants:

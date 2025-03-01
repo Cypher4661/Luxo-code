@@ -6,12 +6,6 @@ from wpiutil import SendableBuilder
 from Constants import AlgaeSubsys
 from enum import Enum
 
-class AlgaeArmPosition(Enum):
-    UP = 0
-    COLLECT = 70
-    PROCESSOR = 30
-    DROP_L2 = 25
-
 
 class AlgaeArmSubsys(Subsystem):
     def __init__(self) -> None:
@@ -27,7 +21,7 @@ class AlgaeArmSubsys(Subsystem):
         self.limit = wpilib.DigitalInput(AlgaeSubsys.limit_id)
         self.input = wpilib.DigitalInput(AlgaeSubsys.revcoder)
         self.absolute_encoder = wpilib.DutyCycleEncoder(self.input)
-        self.armPosition = AlgaeArmPosition.UP
+        self.targetPosition = 0
         self.rest_encoder()
 
     def motor_config(self, motor: rev.SparkMax, direction: bool) -> rev.SparkMax:
@@ -62,12 +56,8 @@ class AlgaeArmSubsys(Subsystem):
         self.motor1_controller.setReference(angle, SparkLowLevel.ControlType.kPosition)
         self.motor2_controller.setReference(angle, SparkLowLevel.ControlType.kPosition)
 
-    def setPosition(self, position:AlgaeArmPosition):
-        self.armPosition = position
-        self.motor_to_position(position.value)
-
     def atPosition(self):
-        return abs(self.get_current_degree() - self.armPosition.value) < AlgaeSubsys.deadband
+        return abs(self.get_current_degree() - self.targetPosition) < AlgaeSubsys.deadband
 
     def stop(self) -> None:
         self.motor1.set(0)
@@ -76,36 +66,7 @@ class AlgaeArmSubsys(Subsystem):
     def get_current_degree(self) -> float:
         return self.encoder.getPosition()
 
-    def setUpPosition(self):
-        self.setPosition(AlgaeArmPosition.UP)
-
-    def setCollectPosition(self):
-        self.setPosition(AlgaeArmPosition.COLLECT)
-
-    def setProcessorPosition(self):
-        self.setPosition(AlgaeArmPosition.PROCESSOR)
-
-    def setDropL2Position(self):
-        self.setPosition(AlgaeArmPosition.DROP_L2)
-
-    def setPositionValue(self, value):
-        a = AlgaeArmPosition(value)
-        if a:
-            self.setPosition(a)
-
-    def getCommand(self,toPosition:AlgaeArmPosition):
-        match toPosition:
-            case AlgaeArmPosition.UP:
-                return InstantCommand(self.setUpPosition)
-            case AlgaeArmPosition.PROCESSOR:
-                return InstantCommand(self.setProcessorPosition)
-            case AlgaeArmPosition.COLLECT:
-                return InstantCommand(self.setCollectPosition)
-            case AlgaeArmPosition.DROP_L2:
-                return InstantCommand(self.setDropL2Position)
-
     def initSendable(self, builder: SendableBuilder) -> None:
         builder.addDoubleProperty("Algae Arm Angle", self.get_current_degree, lambda x: None)
         builder.addBooleanProperty("Algae Limit", self.at_limit, lambda x: None)
-        builder.addDoubleProperty("Algae Arm Target", lambda: self.armPosition.value, self.setPositionValue)
         builder.addBooleanProperty("Algae at Position", self.atPosition, lambda x: None)

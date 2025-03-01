@@ -4,7 +4,7 @@ from Constants import AlgaeIntake
 from commands2.button import CommandXboxController
 
 
-class algaeIntakeCommand(Command):
+class AlgaeIntakeCommand(Command):
     def __init__(
         self,
         subsys: AlgaeIntakeSubsystem,

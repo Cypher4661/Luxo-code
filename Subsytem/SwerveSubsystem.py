@@ -1,3 +1,6 @@
+import math
+from RobotContainer import RobotContainer
+
 from wpimath import filter
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 from wpimath.kinematics import SwerveDrive4Kinematics, ChassisSpeeds
@@ -100,31 +103,29 @@ class SwerveSubsystem(Subsystem):
             self.modules[i].setDesiredState(desiredStates[i], True)
 
     def drive(
-        self, xSpeed: float, ySpeed: float, tSpeed: float, fieldOriented: bool = True
-    ) -> None:
+        self, xSpeed: float, ySpeed: float, tSpeed: float) -> None:
         xSpeed = xSpeed if abs(xSpeed) > OIConstants.kStickDriftLX else 0.0
         ySpeed = ySpeed if abs(ySpeed) > OIConstants.kStickDriftLY else 0.0
         tSpeed = tSpeed if abs(tSpeed) > OIConstants.kStickDriftRX else 0.0
-        cSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(
-            xSpeed, ySpeed, tSpeed, self.getRotation2d() if fieldOriented else 
-            ChassisSpeeds(xSpeed, ySpeed, tSpeed)
-        )
+        cSpeed = ChassisSpeeds(xSpeed, ySpeed, tSpeed)
+        self.setSpeeds(cSpeed)
 
-        moduleState = DriveConstants.kDriveKinematics.toSwerveModuleStates(
-            cSpeed, Translation2d()
-        )
-        self.setModuleStates(moduleState)
-
-    def autoDrive(self, speed: ChassisSpeeds, feedforward=None) -> None:
+    def setSpeeds(self, speed: ChassisSpeeds, correctColor: bool = True) -> None:
+        if correctColor and RobotContainer.isRed:
+            speed.vy = -speed.vy
+            speed.vx = -speed.vx
         temp = ChassisSpeeds.fromRobotRelativeSpeeds(speed, self.getRotation2d())
         moduleState = DriveConstants.kDriveKinematics.toSwerveModuleStates(
-            temp, Translation2d()
-        )
+            temp, self.getRotation2d())
         self.setModuleStates(moduleState)
 
     def getCSpeed(self) -> ChassisSpeeds:
         module_states = (m.getState() for m in self.modules)
         return DriveConstants.kDriveKinematics.toChassisSpeeds(module_states)
+
+    def getVelocity(self):
+        speeds = self.getCSpeed()
+        return math.sqrt(speeds.vx*speeds.vx + speeds.vy*speeds.vy)
 
     def initSendable(self, builder: SendableBuilder) -> None:
         builder.addDoubleProperty('Gyro', self.getHeading, lambda x: None)
