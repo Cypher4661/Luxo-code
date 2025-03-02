@@ -51,6 +51,7 @@ class SwerveModule(Sendable):
 
         self.drive_controller = self.driveMotor.getClosedLoopController()
         self.turning_controller = self.turningMotor.getClosedLoopController()
+        super().__init__()
 
     def get_position(self) -> SwerveModulePosition:
         return SwerveModulePosition(self.driveEncoder.getPosition(), self.get_angle())

@@ -3,12 +3,12 @@ from Constants import LimeLightConstants
 from Commands.GoToPose import GoToPose
 from Subsytem.limelight import limelight
 from Subsytem.SwerveSubsystem import SwerveSubsystem
-import RobotContainer
 from wpimath.geometry import Pose2d
 
 class GoToL3Tag(GoToPose):
-    def __init__(self, left: bool, swerve:SwerveSubsystem, vision: limelight):
-        super().__init__(None, swerve)
+    def __init__(self, left: bool, swerve:SwerveSubsystem, vision: limelight, 
+                 controller: commands2.button.CommandXboxController):
+        super().__init__(None, swerve, controller)
         self.left = left
         self.swerve = swerve
         self.vision = vision

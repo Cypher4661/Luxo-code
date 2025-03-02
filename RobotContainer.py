@@ -148,8 +148,10 @@ class RobotContainer(Sendable):
         self.driverController.x().onTrue(
             AutoAlign(self.swerveSubsystem, self.driverController)
         )
-        self.driverController.rightBumper().onTrue(GoToL3Tag(False, self.swerveSubsystem, self.limelight))
-        self.driverController.leftBumper().onTrue(GoToL3Tag(True, self.swerveSubsystem, self.limelight))
+        self.driverController.rightBumper().onTrue(GoToL3Tag(False, self.swerveSubsystem, self.limelight,
+                                                             self.driverController))
+        self.driverController.leftBumper().onTrue(GoToL3Tag(True, self.swerveSubsystem, self.limelight,
+                                                            self.driverController))
 
         # Operator Controller
 

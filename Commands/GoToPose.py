@@ -1,10 +1,10 @@
 import wpilib
-from RobotContainer import RobotContainer
 from commands2 import Command
 from Subsytem.SwerveSubsystem import SwerveSubsystem
 from Constants import LimeLightConstants
 from wpimath.geometry import Pose2d
 from wpimath.kinematics import ChassisSpeeds
+import commands2
 
 
 class GoToPose(Command):
@@ -12,12 +12,13 @@ class GoToPose(Command):
     driveKp = 2
     omegaKp = 0.1
 
-    def __init__(self, pose: Pose2d | None, subsys: SwerveSubsystem):
+    def __init__(self, pose: Pose2d | None, subsys: SwerveSubsystem,
+                 controller: commands2.button.CommandXboxController):
         self.subsys = subsys
         self.pose = pose
         self.addRequirements(subsys)
         self.targetReached = False
-        self.controller = RobotContainer.container.driverController
+        self.controller = controller
         super().__init__()
 
     def initialize(self):

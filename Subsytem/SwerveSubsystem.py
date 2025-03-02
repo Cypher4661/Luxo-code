@@ -1,5 +1,5 @@
 import math
-from RobotContainer import RobotContainer
+import RobotContainer
 
 from wpimath import filter
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
@@ -60,7 +60,7 @@ class SwerveSubsystem(Subsystem):
         self.odometer = SwerveDrive4PoseEstimator(
             DriveConstants.kDriveKinematics,
             self.getRotation2d(),
-            (m.get_position() for m in self.modules),
+            self.getModulesPosition(),
             Pose2d(0, 0, Rotation2d(0)),
         )
         self.field2d = wpilib._wpilib.Field2d()
@@ -89,7 +89,16 @@ class SwerveSubsystem(Subsystem):
         self.odometer.resetPosition(self.getRotation2d(), self.getModulesPosition(), pose)
 
     def getModulesPosition(self) :
-        return (m.get_position() for m in self.modules)
+        return (self.modules[0].get_position(),
+                self.modules[1].get_position(),
+                self.modules[2].get_position(),
+                self.modules[3].get_position())
+
+    def getModulesState(self) :
+        return (self.modules[0].getState(),
+                self.modules[1].getState(),
+                self.modules[2].getState(),
+                self.modules[3].getState())
 
     def periodic(self) -> None:
         self.odometer.update(self.getRotation2d(), self.getModulesPosition())
@@ -120,7 +129,7 @@ class SwerveSubsystem(Subsystem):
         self.setModuleStates(moduleState)
 
     def getCSpeed(self) -> ChassisSpeeds:
-        module_states = (m.getState() for m in self.modules)
+        module_states = self.getModulesState()
         return DriveConstants.kDriveKinematics.toChassisSpeeds(module_states)
 
     def getVelocity(self):
