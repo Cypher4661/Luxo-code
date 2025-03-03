@@ -1,5 +1,7 @@
 from rev import SparkMax, SparkLowLevel, SparkMaxConfig, ClosedLoopConfig
 from phoenix6.hardware.cancoder import CANcoder
+from phoenix6.configs import CANcoderConfiguration
+from phoenix6.signals import SensorDirectionValue
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
 from wpimath.controller import SimpleMotorFeedforwardMeters
@@ -8,11 +10,14 @@ from Constants import (
     DriveConstants,
 )
 from util.onboard_module_state import OnboardModuleState
+import wpiutil
+from wpilib import SmartDashboard
 
 
-class SwerveModule:
+class SwerveModule(wpiutil._wpiutil.Sendable):
     def __init__(
         self,
+        name,
         driveMotorId: int,
         turningMotorId: int,
         driveMotorReversed: bool,
@@ -21,6 +26,8 @@ class SwerveModule:
         absoluteEncoderOffset: float,
         absoluteEncoderReversed: bool,
     ) -> None:
+        super().__init__()
+        self.name = name
         self.feed_forward = SimpleMotorFeedforwardMeters(
             ModuleConstants.driveKS, ModuleConstants.driveKV, ModuleConstants.driveKA
         )
@@ -28,14 +35,22 @@ class SwerveModule:
         self.absoluteEncoderOffset = absoluteEncoderOffset
         self.absoluteEncoderReversed = absoluteEncoderReversed
         self.absoluteEncoder = CANcoder(absoluteEncoderId)
+        cfg = CANcoderConfiguration()
+        
+        cfg.magnet_sensor.with_sensor_direction(SensorDirectionValue.CLOCKWISE_POSITIVE 
+                                                if absoluteEncoderReversed else 
+                                                SensorDirectionValue.COUNTER_CLOCKWISE_POSITIVE)
+        self.absoluteEncoder.configurator.apply(cfg)
 
         # Drive motor configuration
         self.driveMotor = SparkMax(driveMotorId, SparkLowLevel.MotorType.kBrushless)
+        self.driveConfig = SparkMaxConfig()
         self.driveMotorReversed = driveMotorReversed
 
         # Turning motor configuration
         self.turningMotor = SparkMax(turningMotorId, SparkLowLevel.MotorType.kBrushless)
         self.turningMotorReversed = turningMotorReversed
+        self.turningConfig = SparkMaxConfig()
 
         # Configure encoders and motors
         self.config_driveMotor()
@@ -43,7 +58,7 @@ class SwerveModule:
 
         self.driveEncoder = self.driveMotor.getEncoder()
         self.turningEncoder = self.turningMotor.getEncoder()
-        self.reset_to_absolute()
+        self.reset_to_absolute()    
 
         self.drive_controller = self.driveMotor.getClosedLoopController()
         self.turning_controller = self.turningMotor.getClosedLoopController()
@@ -51,18 +66,13 @@ class SwerveModule:
     def get_position(self) -> SwerveModulePosition:
         return SwerveModulePosition(self.driveEncoder.getPosition(), self.get_angle())
 
+    def getAbsEncoder(self):
+        return self.absoluteEncoder.get_absolute_position().value * 360 
+    
     # Sync the internal motor encoder with the absolute encoder
     def reset_to_absolute(self):
-        absolute_position = (
-            self.absoluteEncoder.get_absolute_position().value * 360
-            - self.absoluteEncoderOffset
-        )
-        desired_state = OnboardModuleState.optimize(
-            SwerveModuleState(0, Rotation2d.fromDegrees(absolute_position)),
-            self.getState().angle,
-            False,
-        )
-        self.turningEncoder.setPosition(desired_state.angle.degrees())
+        absolute_position = self.getAbsEncoder()- self.absoluteEncoderOffset
+        self.turningEncoder.setPosition(absolute_position)
 
     # Setting up the turning motor and configuring it
     def config_turningMotor(self):
@@ -85,6 +95,7 @@ class SwerveModule:
             SparkMax.ResetMode.kResetSafeParameters,
             SparkMax.PersistMode.kPersistParameters,
         )
+        self.turningConfig = config
 
     # Setting up the driving motor and configuring it
     def config_driveMotor(self):
@@ -112,6 +123,7 @@ class SwerveModule:
             SparkMax.ResetMode.kResetSafeParameters,
             SparkMax.PersistMode.kPersistParameters,
         )
+        self.driveConfig = config
 
     def getState(self) -> SwerveModuleState:
         return SwerveModuleState(self.driveEncoder.getVelocity(), self.get_angle())
@@ -149,3 +161,22 @@ class SwerveModule:
                 desired_state.speed,
                 SparkLowLevel.ControlType.kVelocity,
             )
+    def setBrake(self, brake:bool):
+        self.driveConfig.setIdleMode(SparkMaxConfig.IdleMode.kBrake if brake else SparkMaxConfig.IdleMode.kCoast)
+        self.turningConfig.setIdleMode(SparkMaxConfig.IdleMode.kBrake if brake else SparkMaxConfig.IdleMode.kCoast)
+        self.turningMotor.configure(
+            self.turningConfig,
+            SparkMax.ResetMode.kResetSafeParameters,
+            SparkMax.PersistMode.kPersistParameters,
+        )
+        self.driveMotor.configure(
+            self.driveConfig,
+            SparkMax.ResetMode.kResetSafeParameters,
+            SparkMax.PersistMode.kPersistParameters,
+        )
+
+
+    def initSendable(self, builder):
+        builder.addDoubleProperty('angle', self.turningEncoder.getPosition, lambda  x: None)
+        builder.addDoubleProperty('abs', self.getAbsEncoder, lambda  x: None)
+        builder.addDoubleProperty('velocity', self.driveEncoder.getVelocity, lambda  x: None)

@@ -16,7 +16,7 @@ class SwerveDriveCommand(Command):
     def execute(self):
         self.subsys.drive(
             -self.controller.getLeftY(),
-            -self.controller.getLeftX(),
+            self.controller.getLeftX(),
             self.controller.getRightX(),
         )
         return super().execute()

@@ -1,30 +1,19 @@
+import math
+import RobotContainer
 from wpimath import filter
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 from wpimath.kinematics import SwerveDrive4Kinematics, ChassisSpeeds
-from commands2 import Subsystem
-
 from wpimath.estimator import SwerveDrive4PoseEstimator
-from Constants import DriveConstants, OIConstants, ModuleConstants
+from Constants import DriveConstants, OIConstants
 from Subsytem.SwerveModule import SwerveModule
 from navx import AHRS
-from pathplannerlib.config import (
-    RobotConfig,
-    PIDConstants,
-    ModuleConfig,
-)
-from pathplannerlib.controller import PPHolonomicDriveController
-from pathplannerlib.auto import AutoBuilder
 import wpilib
-from wpimath.system.plant import DCMotor
-
+from commands2 import Subsystem
 
 class SwerveSubsystem(Subsystem):
-    def __init__(self) -> None:
-        self.autoCSpeed: ChassisSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(
-            0, 0, 0, Rotation2d.fromDegrees(0)
-        )
-        self.special_drive = False
-
+    def __init__(self,) -> None:
+        super().__init__()
+        self._isRed = False
         self.gyro = AHRS.create_spi()
 
         self.xLimiter = filter.SlewRateLimiter(
@@ -37,7 +26,7 @@ class SwerveSubsystem(Subsystem):
             DriveConstants.kTeleDriveMaxAngularAccelerationUnitsPerSecond
         )
 
-        self.frontLeft: SwerveModule = SwerveModule(
+        self.frontLeft: SwerveModule = SwerveModule('FrontLeft',
             DriveConstants.kFrontLeftDriveMotorPort,
             DriveConstants.kFrontLeftTurningMotorPort,
             DriveConstants.kFrontLeftDriveEncoderReversed,
@@ -47,7 +36,7 @@ class SwerveSubsystem(Subsystem):
             DriveConstants.kFrontLeftDriveAbsoluteEncoderReversed,
         )
 
-        self.frontRight: SwerveModule = SwerveModule(
+        self.frontRight: SwerveModule = SwerveModule('FrontRight',
             DriveConstants.kFrontRightDriveMotorPort,
             DriveConstants.kFrontRightTurningMotorPort,
             DriveConstants.kFrontRightDriveEncoderReversed,
@@ -57,7 +46,7 @@ class SwerveSubsystem(Subsystem):
             DriveConstants.kFrontRightDriveAbsoluteEncoderReversed,
         )
 
-        self.backLeft: SwerveModule = SwerveModule(
+        self.backLeft: SwerveModule = SwerveModule('BackLeft',
             DriveConstants.kBackLeftDriveMotorPort,
             DriveConstants.kBackLeftTurningMotorPort,
             DriveConstants.kBackLeftDriveEncoderReversed,
@@ -67,7 +56,7 @@ class SwerveSubsystem(Subsystem):
             DriveConstants.kBackLeftDriveAbsoluteEncoderReversed,
         )
 
-        self.backRight: SwerveModule = SwerveModule(
+        self.backRight: SwerveModule = SwerveModule('BackRight',
             DriveConstants.kBackRightDriveMotorPort,
             DriveConstants.kBackRightTurningMotorPort,
             DriveConstants.kBackRightDriveEncoderReversed,
@@ -76,9 +65,13 @@ class SwerveSubsystem(Subsystem):
             DriveConstants.kBackRightDriveAbsoluteEncoderOffset,
             DriveConstants.kBackRightDriveAbsoluteEncoderReversed,
         )
+        wpilib.SmartDashboard.putData('FrontLeft',self.frontLeft)
+        wpilib.SmartDashboard.putData('FrontRight',self.frontRight)
+        wpilib.SmartDashboard.putData('BackLeft',self.backLeft)
+        wpilib.SmartDashboard.putData('BackRight',self.backRight)
         self.odometer = SwerveDrive4PoseEstimator(
             DriveConstants.kDriveKinematics,
-            self.getRotation2d(),
+            Rotation2d.fromDegrees(self.getGyroHeading()),
             (
                 self.frontLeft.get_position(),
                 self.frontRight.get_position(),
@@ -87,66 +80,36 @@ class SwerveSubsystem(Subsystem):
             ),
             Pose2d(0, 0, Rotation2d(0)),
         )
-        config = RobotConfig(
-            54.0,
-            9.75,
-            ModuleConfig(
-                ModuleConstants.kWheelDiameterMeters,
-                DriveConstants.kPhysicalMaxSpeedMetersPerSecond,
-                1.0,
-                DCMotor(
-                    12,
-                    22.68,
-                    53.25,
-                    1.5,
-                    DriveConstants.kPhysicalMaxAngularSpeedRadiansPerSecond,
-                ),
-                40.0,
-                1,
-            ),
-            [
-                Translation2d(75.5 / 2, 75.5 / 2),
-                Translation2d(75.5 / 2, 75.5 / 2),
-                Translation2d(75.5 / 2, 75.5 / 2),
-                Translation2d(75.5 / 2, 75.5 / 2),
-            ],
-            DriveConstants.kTrackWidth,
-        )
-        AutoBuilder.configure(
-            self.getPose,  # Robot pose supplier
-            self.resetOdometry,  # Method to reset odometry (will be called if your auto has a starting pose)
-            self.getCSpeed,  # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            lambda speed, feedforward: self.autoDrive(speed, feedforward),
-            PPHolonomicDriveController(  # HolonomicPathFollowerConfig, this should likely live in your Constants class
-                PIDConstants(2, 0, 0),  # Translation PID constants
-                PIDConstants(0.125, 0.1, 0.1),  # Rotation PID constants
-            ),
-            config,
-            self.shouldFlipPath,
-            self,
-        )
+        self.field = wpilib._wpilib.Field2d()
+        self.brake = True
+        wpilib.SmartDashboard.putData('Field Pos', self.field)
+        wpilib.SmartDashboard.putData('Swerve', self)
 
-    def shouldFlipPath(self):
-        # Boolean supplier that controls when the path will be mirrored for the red alliance
-        # This will flip the path being followed to the red side of the field.
-        # THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-        return False
-        return wpilib.DriverStation.getAlliance() == wpilib.DriverStation.Alliance.kRed
+    def getVelocity(self):
+        speeds = self.getCSpeed()
+        return math.sqrt(speeds.vx*speeds.vx + speeds.vy*speeds.vy)
 
     def zeroHeading(self) -> None:
-        self.gyro.reset()
-        self.gyro.setAngleAdjustment(0)
+        self.autoHeading(0)
 
     def autoHeading(self, angle: float) -> None:
-        self.zeroHeading()
+        self.gyro.reset()
         self.gyro.setAngleAdjustment(angle)
+        self.resetOdometry(self.getPose())
+        
 
-    def getHeading(self) -> float:
+    def getGyroHeading(self) -> float:
         angle = self.gyro.getYaw()
         return 360- angle
+    
+    def getGyroRotation2d(self) -> Rotation2d:
+        return Rotation2d.fromDegrees(self.getGyroHeading())
+    
+    def getHeading(self):
+        return self.getRotation2d().degrees()
 
     def getRotation2d(self) -> Rotation2d:
-        return Rotation2d.fromDegrees(self.getHeading())
+        return self.getPose().rotation()
 
     def getPose(self) -> Pose2d:
         return self.odometer.getEstimatedPosition()
@@ -158,7 +121,7 @@ class SwerveSubsystem(Subsystem):
             self.backLeft.get_position(),
             self.backRight.get_position(),
         )
-        self.odometer.resetPosition(self.getRotation2d(), module_positions, pose)
+        self.odometer.resetPosition(self.getGyroRotation2d(), module_positions, pose)
 
     def periodic(self) -> None:
         # print(self.getHeading())
@@ -168,16 +131,17 @@ class SwerveSubsystem(Subsystem):
             self.backLeft.get_position(),
             self.backRight.get_position(),
         )
-        self.odometer.update(self.getRotation2d(), module_positions)
+        self.odometer.update(Rotation2d.fromDegrees(self.getGyroHeading()), module_positions)
+        self.field.setRobotPose(self.odometer.getEstimatedPosition())
 
     def setModuleStates(self, desiredStates) -> None:
         SwerveDrive4Kinematics.desaturateWheelSpeeds(
             desiredStates, DriveConstants.swerve_max_speed
         )
-        self.frontLeft.setDesiredState(desiredStates[3], True)
-        self.frontRight.setDesiredState(desiredStates[2], True)
-        self.backLeft.setDesiredState(desiredStates[1], True)
-        self.backRight.setDesiredState(desiredStates[0], True)
+        self.frontLeft.setDesiredState(desiredStates[0], True)
+        self.frontRight.setDesiredState(desiredStates[1], True)
+        self.backLeft.setDesiredState(desiredStates[2], True)
+        self.backRight.setDesiredState(desiredStates[3], True)
 
     def drive(
         self, xSpeed: float, ySpeed: float, tSpeed: float, fieldOriented: bool = True
@@ -189,10 +153,15 @@ class SwerveSubsystem(Subsystem):
             xSpeed, ySpeed, tSpeed, self.getRotation2d() if fieldOriented else 
             ChassisSpeeds(xSpeed, ySpeed, tSpeed)
         )
+        self.setSpeeds(cSpeed, True)
 
+    def setSpeeds(self, speed: ChassisSpeeds, correctColor: bool = False) -> None:
+        if correctColor and self._isRed:
+            speed.vy = -speed.vy
+            speed.vx = -speed.vx
+        temp = ChassisSpeeds.fromRobotRelativeSpeeds(speed, self.getRotation2d())
         moduleState = DriveConstants.kDriveKinematics.toSwerveModuleStates(
-            cSpeed, Translation2d()
-        )
+            temp, Translation2d())
         self.setModuleStates(moduleState)
 
     def autoDrive(self, speed: ChassisSpeeds, feedforward=None) -> None:
@@ -219,3 +188,25 @@ class SwerveSubsystem(Subsystem):
         self.frontRight.reset_to_absolute()
         self.backLeft.reset_to_absolute()
         self.backRight.reset_to_absolute()
+
+    def setBrake(self,brake:bool):
+        self.brake = brake
+        self.frontLeft.setBrake(brake)
+        self.frontRight.setBrake(brake)
+        self.backLeft.setBrake(brake)
+        self.backRight.setBrake(brake)
+
+    def getBrake(self):
+        return self.brake
+
+    def setRed(self,isRed:bool):
+        self._isRed = isRed,
+    def isRed(self) -> bool:
+        return self._isRed
+    
+    def initSendable(self, builder):
+        builder.addDoubleProperty('Gyro', self.getGyroHeading, lambda x: None)
+        builder.addDoubleProperty('Heading', self.getHeading, lambda x: None)
+        builder.addBooleanProperty('Brake', self.getBrake, self.setBrake)
+#        builder.addBooleanProperty('Is Red', self.isRed, self.setRed), 
+        return super().initSendable(builder)

@@ -10,11 +10,8 @@ class MyRobot(commands2.TimedCommandRobot):
     def robotInit(self) -> None:
         self.scheduler = commands2.CommandScheduler.getInstance().enable()
         self.container = RobotContainer()
-        self.container.swerveSubsystem.zeroHeading()
-        self.container.swerveSubsystem.check_module_angle()
-        self.container.getRedLEDCommand().schedule()
-        self.container.configure_commands()
-        self.container.configure_button_bindings()
+        RobotContainer.container = self.container
+        #wpilib.SmartDashboard.putData('Robot', self.container)
 
         #SmartDashboard.putNumber("L3 Angle", SystemValues.l3ArmAngle)
         #SmartDashboard.putNumber("L2 Angle", SystemValues.l2ArmAngle)
@@ -37,40 +34,6 @@ class MyRobot(commands2.TimedCommandRobot):
     def robotPeriodic(self) -> None:
         commands2.CommandScheduler.getInstance().run()
 
-        # SystemValues.l3ArmAngle = SmartDashboard.getNumber(
-        #     "L3 Angle", SystemValues.l3ArmAngle
-        # )
-        # SystemValues.l2ArmAngle = SmartDashboard.getNumber(
-        #     "L2 Angle", SystemValues.l2ArmAngle
-        # )
-        # SystemValues.intakeAlgiPower = SmartDashboard.getNumber(
-        #     "Intake Algi Power", SystemValues.intakeAlgiPower
-        # )
-        # SystemValues.specialCorralIntakePower = SmartDashboard.getNumber(
-        #     "Special Corral Intake Power", SystemValues.specialCorralIntakePower
-        # )
-        # SystemValues.outputAlgiPower = SmartDashboard.getNumber(
-        #     "Output Algi Power", SystemValues.outputAlgiPower
-        # )
-        # SystemValues.intakeCorralPower = SmartDashboard.getNumber(
-        #     "Intake Corral Power", SystemValues.intakeCorralPower
-        # )
-        # SystemValues.outputCorralPower = SmartDashboard.getNumber(
-        #     "Output Corral Power", SystemValues.outputCorralPower
-        # )
-        # SystemValues.intakeCorralArmAngle = SmartDashboard.getNumber(
-        #     "Intake Corral Angle", SystemValues.intakeCorralArmAngle
-        # )
-        # SystemValues.specialCorralIntakeArmAngle = SmartDashboard.getNumber(
-        #     "Special Corral Intake Angle", SystemValues.specialCorralIntakeArmAngle
-        # )
-        # SystemValues.pickAlgiArmAngle = SmartDashboard.getNumber(
-        #     "Pick Algi Angle", SystemValues.pickAlgiArmAngle
-        # )
-        # SystemValues.ouputAlgiArmAngle = SmartDashboard.getNumber(
-        #     "Output Algi Angle", SystemValues.ouputAlgiArmAngle
-        # )
-
 
     # autonomus
     def autonomousInit(self) -> None:
@@ -86,7 +49,8 @@ class MyRobot(commands2.TimedCommandRobot):
         pass
 
     def teleopPeriodic(self) -> None:
-        return super().teleopPeriodic()
+        print(self.container.swerveSubsystem.getDefaultCommand())
+        pass
 
     def disabledInit(self) -> None:
         return super().disabledInit()

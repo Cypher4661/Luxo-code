@@ -1,4 +1,6 @@
 from commands2 import Command
+import wpilib
+from Commands.GoToL3Tag import GoToL3Tag
 from Constants import (
     OIConstants, SystemValues
 )
@@ -13,32 +15,28 @@ from Commands.AlgiArmCommand import algiArmCommand
 from Commands.LEDAnimationComand import LEDAnimationCommand
 from Commands.AlgiIntakeCommand import algiIntakeCommand
 from Commands.CorralIntakeCommand import corralIntakeCommand
-from Commands.udiAuto import UdiAuto
 from Commands.L1U import l1U
 import commands2
 import commands2.cmd
 import commands2.button
-from pathplannerlib.path import (
-    PathPlannerPath,
-    PathConstraints,
-    GoalEndState,
-    RotationTarget,
-    Waypoint,
-)
-from pathplannerlib.auto import AutoBuilder
 from Subsytem.CorallArmSubsy import corralArmSubsys
 from Subsytem.AlgiArmSubsys import algiArmSubsys
 from Subsytem.AlgiIntake import algiIntake
 from Subsytem.CorralIntake import corralIntake
-from wpimath.geometry import Pose2d, Rotation2d
-import math
-from commands2 import SequentialCommandGroup, ParallelCommandGroup, ParallelDeadlineGroup
+from commands2 import ParallelCommandGroup, ParallelDeadlineGroup
+
+from Subsytem.limelight import limelight
+from wpilib import SmartDashboard
+from wpiutil import Sendable, SendableBuilder
 
 
-class RobotContainer:
+class RobotContainer(Sendable):
+
+    _isRed = False
+    container = None
+
     def __init__(self):
-
-
+        super().__init__()
         # Random Data
         self.led_bool_enable = True
         self.led_bool_disable = True
@@ -52,17 +50,19 @@ class RobotContainer:
         )
 
         # Subsystems
-        self.corralArmSubsystem = corralArmSubsys()
         self.swerveSubsystem = SwerveSubsystem()
+        self.corralArmSubsystem = corralArmSubsys()
         self.led_subsys = ledSubsys()
         self.algiIntakeSubsystem = algiIntake()
         self.corralIntakeSubsystem = corralIntake()
         self.algiArmSubsystem = algiArmSubsys()
+        self.limelight = limelight(self.swerveSubsystem.odometer, self.swerveSubsystem.getVelocity)
+
+        SmartDashboard.putData('Swerve', self.swerveSubsystem)
+        SmartDashboard.putData('vision', self.limelight)
 
         self.configure_commands()
-        self.configure_button_bindings()
-        
-        
+        self.configure_button_bindings()        
 
     def configure_commands(self):
 
@@ -158,6 +158,11 @@ class RobotContainer:
             AutoAlign(self.swerveSubsystem, self.driverController)
         )
 
+        self.driverController.rightBumper().onTrue(GoToL3Tag(False, self.swerveSubsystem, self.limelight,
+                                                             self.driverController))
+        self.driverController.leftBumper().onTrue(GoToL3Tag(True, self.swerveSubsystem, self.limelight,
+                                                            self.driverController))
+
         #Operator Controller
 
         self.operatorController.b().toggleOnTrue(self.intakeAlgiCommand)
@@ -165,9 +170,6 @@ class RobotContainer:
         self.operatorController.povLeft().toggleOnTrue(self.stopIntakeCorralIntakeCommand)
         self.operatorController.rightBumper().toggleOnTrue(self.l3ArmCommand)
         self.operatorController.leftBumper().toggleOnTrue(self.l2ArmCommand)
-
-        self.driverController.rightBumper().toggleOnTrue(self.l3ArmCommand)
-        self.driverController.leftBumper().toggleOnTrue(self.l2ArmCommand)
         
         self.operatorController.x().toggleOnTrue(self.outputCorralIntakeCommand)
         self.operatorController.y().whileTrue(self.outputAlgiIntakeCommand)
@@ -191,34 +193,8 @@ class RobotContainer:
     def getAlgiArmSubsys(self):
         return self.algiArmSubsystem
 
-    def create_path_command(
-        self,
-        bezierPoints: list[Waypoint],
-        goalEndState: GoalEndState,
-        rotaionTargets: list[RotationTarget] = [],
-    ) -> Command:
-        path = PathPlannerPath(
-            bezierPoints,
-            PathConstraints(3.0, 3.0, 2 * math.pi, 2 * math.pi),
-            None,
-            goalEndState,
-        )
-        path_follower_command: Command = AutoBuilder.followPath(path)
-        return path_follower_command
  
     def get_autonomous_command(self) -> Command:
         #return UdiAuto(self.swerveSubsystem)
         return l1U(self.swerveSubsystem).andThen(self.outputCorralIntakeCommand2)
  
-    def get_autonomous_command1(self) -> Command:
-        self.swerveSubsystem.resetOdometry(Pose2d(0, 0, Rotation2d.fromDegrees(0)))
-        self.swerveSubsystem.zeroHeading()
-        bezierPoints = PathPlannerPath.waypointsFromPoses(
-            [
-                Pose2d(0, 0, Rotation2d.fromDegrees(45)),
-                Pose2d(1, 1, Rotation2d.fromDegrees(45)),
-            ]
-        )
-        goalEndState = GoalEndState(0.0, Rotation2d.fromDegrees(0))
-        path_follower_command = self.create_path_command(bezierPoints, goalEndState)
-        return path_follower_command

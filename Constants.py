@@ -1,3 +1,4 @@
+import wpimath
 from wpimath.kinematics import SwerveDrive4Kinematics
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 import math
@@ -88,10 +89,75 @@ class led:
     led_port = 4
     led_length = 120
 
+def inchToMeter(inch):
+    return inch * 0.0254
 
 class LimeLightConstants:
     limelight_name = "limelight-luxo"
-    april_tag_height = []
+    BARGE_TAG_HEIGHT = inchToMeter(73.54)
+    REEF_TAG_HEIGHT = inchToMeter(12.13)
+    STATION_TAG_HEIGHT = inchToMeter(58.50)
+    SIDE_TAG_HEIGHT = inchToMeter(51.25)
+    # april tag data - id, x, y, direction, height
+    april_tag_data = [(1,inchToMeter(657.37), inchToMeter(25.80),126,STATION_TAG_HEIGHT),
+                      (2,inchToMeter(657.37), inchToMeter(291.20),234,STATION_TAG_HEIGHT),
+                      (3,inchToMeter(455.15), inchToMeter(317.15),270,SIDE_TAG_HEIGHT),
+                      (4,inchToMeter(365.20), inchToMeter(241.64),0,BARGE_TAG_HEIGHT),
+                      (5,inchToMeter(365.20), inchToMeter(75.39),0,BARGE_TAG_HEIGHT),
+                      (6,inchToMeter(530.49), inchToMeter(130.17),300,REEF_TAG_HEIGHT),
+                      (7,inchToMeter(546.87), inchToMeter(158.50),0,REEF_TAG_HEIGHT),
+                      (8,inchToMeter(530.49), inchToMeter(186.83),60,REEF_TAG_HEIGHT),
+                      (9,inchToMeter(497.77), inchToMeter(186.83),120,REEF_TAG_HEIGHT),
+                      (10,inchToMeter(481.39), inchToMeter(158.50),180,REEF_TAG_HEIGHT),
+                      (11,inchToMeter(497.77), inchToMeter(130.17),240,REEF_TAG_HEIGHT),
+                      (12,inchToMeter(33.51), inchToMeter(25.80),54,STATION_TAG_HEIGHT),
+                      (13,inchToMeter(33.51), inchToMeter(291.20),306,STATION_TAG_HEIGHT),
+                      (14,inchToMeter(325.68), inchToMeter(241.64),180,BARGE_TAG_HEIGHT),
+                      (15,inchToMeter(325.68), inchToMeter(75.39),180,BARGE_TAG_HEIGHT),
+                      (16,inchToMeter(235.73), inchToMeter(-0.15),90,SIDE_TAG_HEIGHT),
+                      (17,inchToMeter(160.39), inchToMeter(130.17),240,REEF_TAG_HEIGHT),
+                      (18,inchToMeter(144.00), inchToMeter(158.50),180,REEF_TAG_HEIGHT),
+                      (19,inchToMeter(160.39), inchToMeter(186.83),120,REEF_TAG_HEIGHT),
+                      (20,inchToMeter(193.10), inchToMeter(186.83),60,REEF_TAG_HEIGHT),
+                      (21,inchToMeter(209.49), inchToMeter(158.50),0,REEF_TAG_HEIGHT),
+                      (22,inchToMeter(193.10), inchToMeter(130.17),300,REEF_TAG_HEIGHT)]
+
+    LEFT_L3_OFFSET = 0.17
+    RIGHT_L3_OFFSET = LEFT_L3_OFFSET - 0.33
+    BACK_L3_OFFSET = -0.43
+    def getTagTranslation(tagId : int) -> Translation2d:
+        tagId = int(tagId)  # Ensure tagId is an integer
+        return Translation2d(LimeLightConstants.april_tag_data[tagId - 1][1],
+                            LimeLightConstants.april_tag_data[tagId - 1][2])
+
+    def getTagAngle(tagId: int) -> float:
+        tagId = int(tagId)  # Ensure tagId is an integer
+        return LimeLightConstants.april_tag_data[tagId - 1][3]
+
+    def getTagPose(tagId: int) -> Pose2d:
+        tagId = int(tagId)  # Ensure tagId is an integer
+        return Pose2d(LimeLightConstants.getTagTranslation(tagId),
+                    Rotation2d.fromDegrees(LimeLightConstants.getTagAngle(tagId)))
+
+    def getTagRelativePosition(tagId: int, x: float, y: float) -> Pose2d:
+        tagId = int(tagId)  # Ensure tagId is an integer
+        tagTranslation = LimeLightConstants.getTagTranslation(tagId)
+        angle = LimeLightConstants.getTagAngle(tagId)
+        r = Translation2d(x, y).rotateBy(Rotation2d.fromDegrees(angle))
+        return Pose2d(tagTranslation + r, Rotation2d.fromDegrees(wpimath.inputModulus(180 + angle, -180, 180)))
+
+    def getLeftL3Position(tagId: int) -> Pose2d:
+        tagId = int(tagId)  # Ensure tagId is an integer
+        return LimeLightConstants.getTagRelativePosition(tagId,
+                                                        LimeLightConstants.BACK_L3_OFFSET,
+                                                        LimeLightConstants.LEFT_L3_OFFSET)
+
+    def getRightL3Position(tagId: int) -> Pose2d:
+        tagId = int(tagId)  # Ensure tagId is an integer
+        return LimeLightConstants.getTagRelativePosition(tagId,
+                                                        LimeLightConstants.BACK_L3_OFFSET,
+                                                        LimeLightConstants.RIGHT_L3_OFFSET)
+
     
 
 class ModuleConstants:
@@ -128,13 +194,13 @@ class ModuleConstants:
 class DriveConstants:
     slowDriveMultiplier = 0.4
     # Chassis
-    kTrackWidth = 0.75
-    kWheelBase = 0.75
+    kTrackWidth = 0.63
+    kWheelBase = 0.63
     kDriveKinematics = SwerveDrive4Kinematics(
-        Translation2d(kWheelBase / 2, kTrackWidth / 2),
         Translation2d(kWheelBase / 2, -kTrackWidth / 2),
-        Translation2d(-kWheelBase / 2, kTrackWidth / 2),
+        Translation2d(kWheelBase / 2, kTrackWidth / 2),
         Translation2d(-kWheelBase / 2, -kTrackWidth / 2),
+        Translation2d(-kWheelBase / 2, kTrackWidth / 2),
     )
 
     swerve_max_speed = 4
@@ -145,38 +211,38 @@ class DriveConstants:
     # FrontLeft
     kFrontLeftDriveMotorPort = 2
     kFrontLeftTurningMotorPort = 1
-    kFrontLeftTurningEncoderReversed = True
+    kFrontLeftTurningEncoderReversed = False
     kFrontLeftDriveEncoderReversed = True
     kFrontLeftDriveAbsoluteEncoderPort = 9
-    kFrontLeftDriveAbsoluteEncoderReversed = False
-    kFrontLeftDriveAbsoluteEncoderOffset = 356.22072
+    kFrontLeftDriveAbsoluteEncoderReversed = True
+    kFrontLeftDriveAbsoluteEncoderOffset = -12.7
 
     # FrontRight
     kFrontRightDriveMotorPort = 7
     kFrontRightTurningMotorPort = 8
-    kFrontRightTurningEncoderReversed = True
+    kFrontRightTurningEncoderReversed = False
     kFrontRightDriveEncoderReversed = True
     kFrontRightDriveAbsoluteEncoderPort = 10
-    kFrontRightDriveAbsoluteEncoderReversed = False
-    kFrontRightDriveAbsoluteEncoderOffset = 6.6798
+    kFrontRightDriveAbsoluteEncoderReversed = True
+    kFrontRightDriveAbsoluteEncoderOffset = -6.5
 
     # BackLeft
     kBackLeftDriveMotorPort = 4
     kBackLeftTurningMotorPort = 3
-    kBackLeftTurningEncoderReversed = True
-    kBackLeftDriveEncoderReversed = False
+    kBackLeftTurningEncoderReversed = False
+    kBackLeftDriveEncoderReversed = True
     kBackLeftDriveAbsoluteEncoderPort = 12
-    kBackLeftDriveAbsoluteEncoderReversed = False
-    kBackLeftDriveAbsoluteEncoderOffset = 239.854
+    kBackLeftDriveAbsoluteEncoderReversed = True
+    kBackLeftDriveAbsoluteEncoderOffset = -61.0
 
     # BackRight
     kBackRightDriveMotorPort = 5
     kBackRightTurningMotorPort = 6
-    kBackRightTurningEncoderReversed = True
-    kBackRightDriveEncoderReversed = False
+    kBackRightTurningEncoderReversed = False
+    kBackRightDriveEncoderReversed = True
     kBackRightDriveAbsoluteEncoderPort = 11
-    kBackRightDriveAbsoluteEncoderReversed = False
-    kBackRightDriveAbsoluteEncoderOffset = 62.9298
+    kBackRightDriveAbsoluteEncoderReversed = True
+    kBackRightDriveAbsoluteEncoderOffset = 120.8
 
     # Constants
     kPhysicalMaxSpeedMetersPerSecond = 4.6
