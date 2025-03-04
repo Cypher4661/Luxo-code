@@ -56,7 +56,7 @@ class RobotContainer(Sendable):
         self.algiIntakeSubsystem = algiIntake()
         self.corralIntakeSubsystem = corralIntake()
         self.algiArmSubsystem = algiArmSubsys()
-        self.limelight = limelight(self.swerveSubsystem.odometer, self.swerveSubsystem.getVelocity)
+        self.limelight = limelight(self.swerveSubsystem,self.led_subsys, self.swerveSubsystem.getVelocity)
 
         SmartDashboard.putData('Swerve', self.swerveSubsystem)
         SmartDashboard.putData('vision', self.limelight)
@@ -121,7 +121,7 @@ class RobotContainer(Sendable):
         self.swerveCommand = SwerveDriveCommand(
             self.swerveSubsystem, self.driverController
         )
-        self.led_subsys.setDefaultCommand(self.led_command_yellow)
+        self.led_subsys.change_color([240, 240, 0])
 
         # Set Default Commands
         self.swerveSubsystem.setDefaultCommand(self.swerveCommand)
@@ -132,13 +132,13 @@ class RobotContainer(Sendable):
 
         # Command Groups
         self.intakeAlgiCommand = ParallelDeadlineGroup(
-            self.intakeAlgiIntakeCommand, self.pickAlgiArmCommand, self.led_command_flash_blue
+            self.intakeAlgiIntakeCommand, self.pickAlgiArmCommand, self.led_command_blue
         )
         self.intakeCorralCommand = ParallelDeadlineGroup(
-            self.intakeCorralIntakeCommand, self.intakeCorralArmCommand, self.led_command_flash_purple
+            self.intakeCorralIntakeCommand, self.intakeCorralArmCommand, self.led_command_purple
         )
         self.specialCorralIntakeCommand = ParallelCommandGroup(
-            self.specialIntakeCorralCommand, self.specialIntakeCorralArmCommand, self.led_command_flash_white
+            self.specialIntakeCorralCommand, self.specialIntakeCorralArmCommand, self.led_command_yellow
         )
 
     def configure_button_bindings(self):

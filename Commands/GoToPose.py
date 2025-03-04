@@ -5,6 +5,7 @@ from Constants import LimeLightConstants
 from wpimath.geometry import Pose2d
 from wpimath.kinematics import ChassisSpeeds
 import commands2
+from wpilib import SmartDashboard
 
 
 class GoToPose(Command):
@@ -22,7 +23,19 @@ class GoToPose(Command):
         super().__init__()
 
     def initialize(self):
-        self.targetReached = False if self.pose else True
+        self.targetReached = False if self.pose != None else True
+        if not self.targetReached:
+            SmartDashboard.putNumber('Go/X', self.pose.translation().x)
+            SmartDashboard.putNumber('Go/Y', self.pose.translation().y) 
+            SmartDashboard.putNumber('Go/Deg', self.pose.rotation().degrees())
+            pose = self.subsys.getPose()
+            SmartDashboard.putNumber('Go/from X', pose.translation().x)
+            SmartDashboard.putNumber('Go/from Y', pose.translation().y) 
+            SmartDashboard.putNumber('Go/from Deg', pose.rotation().degrees())
+            error = self.pose.relativeTo(pose)
+            SmartDashboard.putNumber('Go/error X', error.translation().x)
+            SmartDashboard.putNumber('Go/error Y', error.translation().y) 
+            SmartDashboard.putNumber('Go/error Deg', error.rotation().degrees())
 
     def execute(self):
         # stop if driver is driving

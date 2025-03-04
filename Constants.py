@@ -173,7 +173,7 @@ class ModuleConstants:
     drive_kp = 1
     drive_ki = 0.0
     drive_kd = 0.0
-    drive_kf = 1
+    drive_kf = 0.25
 
     kWheelDiameterMeters = 0.095
     kDriveMotorGearRatio = 6.75
@@ -197,10 +197,10 @@ class DriveConstants:
     kTrackWidth = 0.63
     kWheelBase = 0.63
     kDriveKinematics = SwerveDrive4Kinematics(
-        Translation2d(kWheelBase / 2, -kTrackWidth / 2),
         Translation2d(kWheelBase / 2, kTrackWidth / 2),
-        Translation2d(-kWheelBase / 2, -kTrackWidth / 2),
+        Translation2d(kWheelBase / 2, -kTrackWidth / 2),
         Translation2d(-kWheelBase / 2, kTrackWidth / 2),
+        Translation2d(-kWheelBase / 2, -kTrackWidth / 2),
     )
 
     swerve_max_speed = 4
@@ -211,38 +211,38 @@ class DriveConstants:
     # FrontLeft
     kFrontLeftDriveMotorPort = 2
     kFrontLeftTurningMotorPort = 1
-    kFrontLeftTurningEncoderReversed = False
+    kFrontLeftTurningEncoderReversed = True
     kFrontLeftDriveEncoderReversed = True
     kFrontLeftDriveAbsoluteEncoderPort = 9
-    kFrontLeftDriveAbsoluteEncoderReversed = True
-    kFrontLeftDriveAbsoluteEncoderOffset = -12.7
+    kFrontLeftDriveAbsoluteEncoderReversed = False
+    kFrontLeftDriveAbsoluteEncoderOffset = 12.7
 
     # FrontRight
     kFrontRightDriveMotorPort = 7
     kFrontRightTurningMotorPort = 8
-    kFrontRightTurningEncoderReversed = False
+    kFrontRightTurningEncoderReversed = True
     kFrontRightDriveEncoderReversed = True
     kFrontRightDriveAbsoluteEncoderPort = 10
-    kFrontRightDriveAbsoluteEncoderReversed = True
-    kFrontRightDriveAbsoluteEncoderOffset = -6.5
+    kFrontRightDriveAbsoluteEncoderReversed = False
+    kFrontRightDriveAbsoluteEncoderOffset = 6.5
 
     # BackLeft
     kBackLeftDriveMotorPort = 4
     kBackLeftTurningMotorPort = 3
-    kBackLeftTurningEncoderReversed = False
+    kBackLeftTurningEncoderReversed = True
     kBackLeftDriveEncoderReversed = True
     kBackLeftDriveAbsoluteEncoderPort = 12
-    kBackLeftDriveAbsoluteEncoderReversed = True
-    kBackLeftDriveAbsoluteEncoderOffset = -61.0
+    kBackLeftDriveAbsoluteEncoderReversed = False
+    kBackLeftDriveAbsoluteEncoderOffset = 61.0
 
     # BackRight
     kBackRightDriveMotorPort = 5
     kBackRightTurningMotorPort = 6
-    kBackRightTurningEncoderReversed = False
+    kBackRightTurningEncoderReversed = True
     kBackRightDriveEncoderReversed = True
     kBackRightDriveAbsoluteEncoderPort = 11
-    kBackRightDriveAbsoluteEncoderReversed = True
-    kBackRightDriveAbsoluteEncoderOffset = 120.8
+    kBackRightDriveAbsoluteEncoderReversed = False
+    kBackRightDriveAbsoluteEncoderOffset = -120.8
 
     # Constants
     kPhysicalMaxSpeedMetersPerSecond = 4.6

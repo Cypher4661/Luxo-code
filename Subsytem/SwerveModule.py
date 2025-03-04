@@ -131,7 +131,11 @@ class SwerveModule(wpiutil._wpiutil.Sendable):
     def get_angle(self) -> Rotation2d:
         return Rotation2d.fromDegrees(self.turningEncoder.getPosition())
 
+    def get_neg_angle(self) -> Rotation2d:
+        return Rotation2d.fromDegrees(self.turningEncoder.getPosition()).__neg__()
+
     def setDesiredState(self, state: SwerveModuleState, is_open_loop: bool) -> None:
+#        state.angle = state.angle.__neg__()
         desired_state = OnboardModuleState.optimize(state, self.getState().angle)
         if abs(desired_state.angle.degrees() - self.turningEncoder.getPosition()) > 0.6:
             self.turning_controller.setReference(
@@ -140,27 +144,25 @@ class SwerveModule(wpiutil._wpiutil.Sendable):
             )
         else:
             self.turningMotor.set(0)
-        self.set_speed(desired_state, is_open_loop)
+        self.set_speed(desired_state.speed, is_open_loop)
 
-    def set_speed(self, desired_state: SwerveModuleState, is_open_loop: bool) -> None:
-        if (
-            is_open_loop
-            and abs(desired_state.speed) <= DriveConstants.swerve_max_speed * 0.05
-        ):
-            self.driveMotor.set(0)
-        elif is_open_loop:
-            percent_output = desired_state.speed
-            percent_output = pow(percent_output, 2) * (
-                abs(percent_output) / percent_output
-            )
-            if abs(percent_output) >= 1:
-                percent_output = abs(percent_output) / percent_output
-            self.driveMotor.set(percent_output)
+    def set_speed(self, speed: float, is_open_loop: bool) -> None:
+        if is_open_loop:
+            if abs(speed) <= DriveConstants.swerve_max_speed * 0.05:
+                self.driveMotor.set(0)
+            else:
+                percent_output = speed / DriveConstants.swerve_max_speed
+                percent_output = speed * speed if speed > 0 else -speed * speed
+                percent_output = 1 if percent_output > 1 else -1 if percent_output < -1 else percent_output
+                self.driveMotor.set(percent_output)
         else:
-            self.drive_controller.setReference(
-                desired_state.speed,
-                SparkLowLevel.ControlType.kVelocity,
-            )
+            if abs(speed) < 0.05:
+                self.driveMotor.set(0)
+            else:
+                volts = ModuleConstants.driveKS if speed > 0 else -ModuleConstants.driveKS
+                volts = volts + speed * ModuleConstants.driveKV
+                self.driveMotor.set(volts/12)
+
     def setBrake(self, brake:bool):
         self.driveConfig.setIdleMode(SparkMaxConfig.IdleMode.kBrake if brake else SparkMaxConfig.IdleMode.kCoast)
         self.turningConfig.setIdleMode(SparkMaxConfig.IdleMode.kBrake if brake else SparkMaxConfig.IdleMode.kCoast)

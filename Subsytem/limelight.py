@@ -11,15 +11,17 @@ from wpimath.estimator import SwerveDrive4PoseEstimator
 import wpilib
 from collections.abc import Callable
 from wpilib import SmartDashboard
+from Subsytem.LEDSubsys import ledSubsys
+from Subsytem.SwerveSubsystem import SwerveSubsystem
 
 
 class limelight(Subsystem):
-    def __init__(self, poseEstimator: SwerveDrive4PoseEstimator, getVelocity: Callable[[], float]) -> None:
+    def __init__(self, swerve: SwerveSubsystem, led:ledSubsys, getVelocity: Callable[[], float]) -> None:
         super().__init__()
+        self.led = led
         self.ntTable = NetworkTableInstance.getDefault().getTable(LimeLightConstants.limelight_name)
         self.field2d = wpilib._wpilib.Field2d()
-        self.poseEstimator = poseEstimator
-        self.getVelocity = getVelocity
+        self.swerve = swerve
         self.validCount = 0
         SmartDashboard.putData('Limelight/field', self.field2d)
 
@@ -39,22 +41,30 @@ class limelight(Subsystem):
 
 
     def getPose(self):
-        if self.inView() and abs(self.getVelocity() < 0.2):
-            # data - x,y,x,roll,pitch,yaw,latency,tag count, tag span, avg tag distance, avg tag area
+        if(self.inView()):
+            # data - x,y,z,roll,pitch,yaw,latency,tag count, tag span, avg tag distance, avg tag area
             data = self.ntTable.getNumberArray("botpose_wpiblue", [999] * 11)
-            if data[0] != 999:
-                return Pose2d(Translation2d(data[0], data[1]), Rotation2d.fromDegrees(data[5])), data[6]
+            if data[0] >0:
+                return Pose2d(Translation2d(data[0], data[1]), self.swerve.getRotation2d()), data[6]
         return None, 0
 
 
     def periodic(self) -> None:
         pose, latency = self.getPose()
-        if pose:
+        SmartDashboard.putBoolean('Vision/inView', self.inView())
+        SmartDashboard.putBoolean('Vision/Pose', pose != None)
+        SmartDashboard.putNumber('Vision/tid', self.getTagId())
+        SmartDashboard.putNumber('Vision/count', self.validCount)
+        
+        if pose is not None:
+            self.led.change_color([50, 250, 50])
             self.field2d.setRobotPose(pose)
-            self.validCount = self.validCount + 1
+            self.validCount += 1
             if self.validCount > 2:
-                self.poseEstimator.addVisionMeasurement(pose, latency)
+                self.swerve.resetOdometry(pose)
+                self.swerve.odometer.addVisionMeasurement(pose, wpilib.Timer.getFPGATimestamp() - latency)
         else:
+            self.led.change_color([200, 50, 50])
             self.validCount = 0
 
 

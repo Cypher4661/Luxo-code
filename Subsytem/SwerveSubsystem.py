@@ -15,6 +15,7 @@ class SwerveSubsystem(Subsystem):
         super().__init__()
         self._isRed = False
         self.gyro = AHRS.create_spi()
+        self.gyroOffset = 0
 
         self.xLimiter = filter.SlewRateLimiter(
             DriveConstants.kTeleDriveMaxAccelerationUnitsPerSecond
@@ -93,9 +94,11 @@ class SwerveSubsystem(Subsystem):
         self.autoHeading(0)
 
     def autoHeading(self, angle: float) -> None:
-        self.gyro.reset()
-        self.gyro.setAngleAdjustment(angle)
-        self.resetOdometry(self.getPose())
+        pose = Pose2d(self.getPose().translation(), Rotation2d.fromDegrees(angle))
+        self.resetOdometry(pose)
+        wpilib.SmartDashboard.putNumber('Reset Gyro to', angle)
+        wpilib.SmartDashboard.putNumber('Reset Gyro updated', self.getHeading())
+        
         
 
     def getGyroHeading(self) -> float:
@@ -113,6 +116,9 @@ class SwerveSubsystem(Subsystem):
 
     def getPose(self) -> Pose2d:
         return self.odometer.getEstimatedPosition()
+    
+    def getTranslation2d(self):
+        return self.getPose().translation
 
     def resetOdometry(self, pose: Pose2d) -> None:
         module_positions = (
@@ -138,30 +144,28 @@ class SwerveSubsystem(Subsystem):
         SwerveDrive4Kinematics.desaturateWheelSpeeds(
             desiredStates, DriveConstants.swerve_max_speed
         )
-        self.frontLeft.setDesiredState(desiredStates[0], True)
-        self.frontRight.setDesiredState(desiredStates[1], True)
-        self.backLeft.setDesiredState(desiredStates[2], True)
-        self.backRight.setDesiredState(desiredStates[3], True)
+        self.frontLeft.setDesiredState(desiredStates[0], False)
+        self.frontRight.setDesiredState(desiredStates[1], False)
+        self.backLeft.setDesiredState(desiredStates[2], False)
+        self.backRight.setDesiredState(desiredStates[3], False)
 
     def drive(
-        self, xSpeed: float, ySpeed: float, tSpeed: float, fieldOriented: bool = True
-    ) -> None:
+        self, xSpeed: float, ySpeed: float, tSpeed: float) -> None:
         xSpeed = xSpeed if abs(xSpeed) > OIConstants.kStickDriftLX else 0.0
         ySpeed = ySpeed if abs(ySpeed) > OIConstants.kStickDriftLY else 0.0
         tSpeed = tSpeed if abs(tSpeed) > OIConstants.kStickDriftRX else 0.0
-        cSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(
-            xSpeed, ySpeed, tSpeed, self.getRotation2d() if fieldOriented else 
-            ChassisSpeeds(xSpeed, ySpeed, tSpeed)
-        )
+        xSpeed = xSpeed * DriveConstants.swerve_max_speed
+        ySpeed = ySpeed * DriveConstants.swerve_max_speed
+        tSpeed = tSpeed * DriveConstants.kPhysicalMaxAngularSpeedRadiansPerSecond
+        cSpeed = ChassisSpeeds(xSpeed, ySpeed, tSpeed)
         self.setSpeeds(cSpeed, True)
 
     def setSpeeds(self, speed: ChassisSpeeds, correctColor: bool = False) -> None:
         if correctColor and self._isRed:
             speed.vy = -speed.vy
             speed.vx = -speed.vx
-        temp = ChassisSpeeds.fromRobotRelativeSpeeds(speed, self.getRotation2d())
-        moduleState = DriveConstants.kDriveKinematics.toSwerveModuleStates(
-            temp, Translation2d())
+        temp = ChassisSpeeds.fromFieldRelativeSpeeds(speed, self.getRotation2d())
+        moduleState = DriveConstants.kDriveKinematics.toSwerveModuleStates(temp)
         self.setModuleStates(moduleState)
 
     def autoDrive(self, speed: ChassisSpeeds, feedforward=None) -> None:

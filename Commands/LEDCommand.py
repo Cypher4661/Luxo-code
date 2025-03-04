@@ -16,12 +16,9 @@ class ledCommand(Command):
     def execute(self):
         self.subsys.change_color(self.color)
         self.run = True
-        return super().execute()
 
     def isFinished(self) -> bool:
         return self.run
-        return super().isFinished()
 
     def runsWhenDisabled(self) -> bool:
         return True
-        return super().runsWhenDisabled()
