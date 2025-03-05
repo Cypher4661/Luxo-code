@@ -194,10 +194,7 @@ class RobotContainer(Sendable):
     def getAlgiArmSubsys(self):
         return self.algiArmSubsystem
 
- 
-    def get_autonomous_command(self) -> Command:
-        # return l1U(self.swerveSubsystem).andThen(self.outputCorralIntakeCommand2)
-        # we are looking at the tag - we need to get to Drop L2
+    def autoL3Command(self) -> Command:
         cmd = (GoToDropL2Tag(self.swerveSubsystem, self.limelight, self.driverController)
                .alongWith(algiArmCommand(self.algiArmSubsystem, 20, True),
                                 algiIntakeCommand(self.algiIntakeSubsystem, -0.6, True))
@@ -213,5 +210,12 @@ class RobotContainer(Sendable):
                                               self.operatorController).withTimeout(1))
         cmd = cmd.andThen(GoToRobotRelative(self.swerveSubsystem, -0.5, 0, 0,self.operatorController).withTimeout(1))
         return cmd
+
+    def autoL1Command(self)->Command:
+        return l1U(self.swerveSubsystem).andThen(self.outputCorralIntakeCommand2)
+
+ 
+    def get_autonomous_command(self) -> Command:
+        return self.autoL3Command()
 
  
