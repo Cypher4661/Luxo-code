@@ -1,6 +1,8 @@
 from commands2 import Command
 import wpilib
 from Commands.GoToL3Tag import GoToL3Tag
+from Commands.GoToDroL2Tag import GoToDropL2Tag
+from Commands.GoToRobotRelative import GoToRobotRelative
 from Constants import (
     OIConstants, SystemValues
 )
@@ -9,7 +11,6 @@ from Subsytem.LEDSubsys import ledSubsys
 from Commands.LEDCommand import ledCommand
 from Commands.CorallArmCommand import corralArmCommand
 from Commands.SlowSwerveDriveCommand import SlowSwerveDriveCommand
-from Commands.AutoAlign import AutoAlign
 from Commands.SwerveDriveCommand import SwerveDriveCommand
 from Commands.AlgiArmCommand import algiArmCommand
 from Commands.LEDAnimationComand import LEDAnimationCommand
@@ -195,6 +196,22 @@ class RobotContainer(Sendable):
 
  
     def get_autonomous_command(self) -> Command:
-        #return UdiAuto(self.swerveSubsystem)
-        return l1U(self.swerveSubsystem).andThen(self.outputCorralIntakeCommand2)
+        # return l1U(self.swerveSubsystem).andThen(self.outputCorralIntakeCommand2)
+        # we are looking at the tag - we need to get to Drop L2
+        cmd = (GoToDropL2Tag(self.swerveSubsystem, self.limelight, self.driverController)
+               .alongWith(algiArmCommand(self.algiArmSubsystem, 20, True),
+                                algiIntakeCommand(self.algiIntakeSubsystem, -0.6, True))
+               ).withTimeout(3)
+        cmd = cmd.andThen(GoToRobotRelative(self.swerveSubsystem, 0, -1, 90,self.operatorController).withTimeout(3))
+        cmd = cmd.andThen(
+                (GoToL3Tag(True, self.swerveSubsystem, self.limelight, self.operatorController)
+                 .alongWith(corralArmCommand(self.corralArmSubsystem, SystemValues.l3ArmAngle,True)))
+                .withTimeout(3))
+        cmd = cmd.andThen(corralIntakeCommand(self.corralIntakeSubsystem,
+                                              SystemValues.outputCorralPower,
+                                              True,
+                                              self.operatorController).withTimeout(1))
+        cmd = cmd.andThen(GoToRobotRelative(self.swerveSubsystem, -0.5, 0, 0,self.operatorController).withTimeout(1))
+        return cmd
+
  

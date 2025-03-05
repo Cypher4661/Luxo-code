@@ -142,9 +142,9 @@ class LimeLightConstants:
     def getTagRelativePosition(tagId: int, x: float, y: float) -> Pose2d:
         tagId = int(tagId)  # Ensure tagId is an integer
         tagTranslation = LimeLightConstants.getTagTranslation(tagId)
-        angle = LimeLightConstants.getTagAngle(tagId)
+        angle = wpimath.inputModulus(180 + LimeLightConstants.getTagAngle(tagId), -180, 180)
         r = Translation2d(x, y).rotateBy(Rotation2d.fromDegrees(angle))
-        return Pose2d(tagTranslation + r, Rotation2d.fromDegrees(wpimath.inputModulus(180 + angle, -180, 180)))
+        return Pose2d(tagTranslation + r, Rotation2d.fromDegrees(angle))
 
     def getLeftL3Position(tagId: int) -> Pose2d:
         tagId = int(tagId)  # Ensure tagId is an integer
