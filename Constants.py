@@ -4,6 +4,7 @@ from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 import math
 from wpimath.trajectory import TrapezoidProfileRadians
 from rev import SparkMax
+import wpilib
 
 
 class SystemValues:
@@ -122,9 +123,9 @@ class LimeLightConstants:
                       (21,inchToMeter(209.49), inchToMeter(158.50),0,REEF_TAG_HEIGHT),
                       (22,inchToMeter(193.10), inchToMeter(130.17),300,REEF_TAG_HEIGHT)]
 
-    LEFT_L3_OFFSET = 0.17
-    RIGHT_L3_OFFSET = LEFT_L3_OFFSET - 0.33
-    BACK_L3_OFFSET = -0.43
+    LEFT_L3_OFFSET = -0.2
+    RIGHT_L3_OFFSET = LEFT_L3_OFFSET + 0.25
+    BACK_L3_OFFSET = 0.43
     def getTagTranslation(tagId : int) -> Translation2d:
         tagId = int(tagId)  # Ensure tagId is an integer
         return Translation2d(LimeLightConstants.april_tag_data[tagId - 1][1],
@@ -133,6 +134,10 @@ class LimeLightConstants:
     def getTagAngle(tagId: int) -> float:
         tagId = int(tagId)  # Ensure tagId is an integer
         return LimeLightConstants.april_tag_data[tagId - 1][3]
+    
+    def getTagRotation(tagId: int) -> Rotation2d:
+        tagId = int(tagId)  # Ensure tagId is an integer
+        return Rotation2d.fromDegrees(LimeLightConstants.april_tag_data[tagId - 1][3])
 
     def getTagPose(tagId: int) -> Pose2d:
         tagId = int(tagId)  # Ensure tagId is an integer
@@ -142,9 +147,19 @@ class LimeLightConstants:
     def getTagRelativePosition(tagId: int, x: float, y: float) -> Pose2d:
         tagId = int(tagId)  # Ensure tagId is an integer
         tagTranslation = LimeLightConstants.getTagTranslation(tagId)
-        angle = wpimath.inputModulus(180 + LimeLightConstants.getTagAngle(tagId), -180, 180)
+        angle = wpimath.inputModulus(LimeLightConstants.getTagAngle(tagId), -180, 180)
         r = Translation2d(x, y).rotateBy(Rotation2d.fromDegrees(angle))
-        return Pose2d(tagTranslation + r, Rotation2d.fromDegrees(angle))
+        wpilib.SmartDashboard.putNumber('Tag/x', x)
+        wpilib.SmartDashboard.putNumber('Tag/y', y)
+        wpilib.SmartDashboard.putNumber('Tag/r x', r.X())
+        wpilib.SmartDashboard.putNumber('Tag/r y', r.Y())
+        wpilib.SmartDashboard.putNumber('Tag/t x', tagTranslation.X())
+        wpilib.SmartDashboard.putNumber('Tag/t y', tagTranslation.Y())
+        trans = tagTranslation + r
+        wpilib.SmartDashboard.putNumber('Tag/p x', trans.X())
+        wpilib.SmartDashboard.putNumber('Tag/p y', trans.Y())
+        
+        return Pose2d(tagTranslation + r, Rotation2d.fromDegrees(angle+180))
 
     def getLeftL3Position(tagId: int) -> Pose2d:
         tagId = int(tagId)  # Ensure tagId is an integer

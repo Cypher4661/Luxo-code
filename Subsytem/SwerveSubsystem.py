@@ -149,15 +149,21 @@ class SwerveSubsystem(Subsystem):
         self.backLeft.setDesiredState(desiredStates[2], False)
         self.backRight.setDesiredState(desiredStates[3], False)
 
+    def getStickValue(self, value: float, multiplier: float)->float:
+        if value > OIConstants.kStickDriftLX:
+            return value*value*multiplier
+        elif value < OIConstants.kStickDriftLX:
+            return -value*value*multiplier
+        else:
+            return 0
+        
+
     def drive(
         self, xSpeed: float, ySpeed: float, tSpeed: float) -> None:
-        xSpeed = xSpeed if abs(xSpeed) > OIConstants.kStickDriftLX else 0.0
-        ySpeed = ySpeed if abs(ySpeed) > OIConstants.kStickDriftLY else 0.0
-        tSpeed = tSpeed if abs(tSpeed) > OIConstants.kStickDriftRX else 0.0
-        xSpeed = xSpeed * DriveConstants.swerve_max_speed
-        ySpeed = ySpeed * DriveConstants.swerve_max_speed
-        tSpeed = tSpeed * DriveConstants.kPhysicalMaxAngularSpeedRadiansPerSecond
-        cSpeed = ChassisSpeeds(xSpeed, ySpeed, tSpeed)
+        x = self.getStickValue(xSpeed,DriveConstants.swerve_max_speed)
+        y = self.getStickValue(ySpeed,DriveConstants.swerve_max_speed)
+        t = self.getStickValue(tSpeed,DriveConstants.kPhysicalMaxAngularSpeedRadiansPerSecond)
+        cSpeed = ChassisSpeeds(x, y, t)
         self.setSpeeds(cSpeed, True)
 
     def setSpeeds(self, speed: ChassisSpeeds, correctColor: bool = False) -> None:
@@ -204,7 +210,8 @@ class SwerveSubsystem(Subsystem):
         return self.brake
 
     def setRed(self,isRed:bool):
-        self._isRed = isRed,
+        self._isRed = isRed
+        
     def isRed(self) -> bool:
         return self._isRed
     
@@ -212,5 +219,5 @@ class SwerveSubsystem(Subsystem):
         builder.addDoubleProperty('Gyro', self.getGyroHeading, lambda x: None)
         builder.addDoubleProperty('Heading', self.getHeading, lambda x: None)
         builder.addBooleanProperty('Brake', self.getBrake, self.setBrake)
-#        builder.addBooleanProperty('Is Red', self.isRed, self.setRed), 
+        builder.addBooleanProperty('Is Red', self.isRed, self.setRed), 
         return super().initSendable(builder)

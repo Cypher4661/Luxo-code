@@ -36,11 +36,12 @@ class RobotContainer(Sendable):
     _isRed = False
     container = None
 
-    def __init__(self):
+    def __init__(self, isDisabled):
         super().__init__()
         # Random Data
         self.led_bool_enable = True
         self.led_bool_disable = True
+        self.isDisabled = isDisabled
 
         # Controllers
         self.driverController = commands2.button.CommandXboxController(
@@ -57,7 +58,7 @@ class RobotContainer(Sendable):
         self.algiIntakeSubsystem = algiIntake()
         self.corralIntakeSubsystem = corralIntake()
         self.algiArmSubsystem = algiArmSubsys()
-        self.limelight = limelight(self.swerveSubsystem,self.led_subsys, self.swerveSubsystem.getVelocity)
+        self.limelight = limelight(self.swerveSubsystem,self.led_subsys, self.swerveSubsystem.getVelocity, self.isDisabled)
 
         SmartDashboard.putData('Swerve', self.swerveSubsystem)
         SmartDashboard.putData('vision', self.limelight)
@@ -147,7 +148,7 @@ class RobotContainer(Sendable):
         # Driver Controller
 
         self.driverController.b().onTrue(
-            commands2.cmd.runOnce(lambda: self.swerveSubsystem.zeroHeading())
+            commands2.cmd.runOnce(lambda: self.swerveSubsystem.zeroHeading()).ignoringDisable(True)
         )
         self.driverController.y().onTrue(
             commands2.cmd.runOnce(lambda: self.swerveSubsystem.check_module_angle())
@@ -155,10 +156,7 @@ class RobotContainer(Sendable):
         self.driverController.a().toggleOnTrue(
             SlowSwerveDriveCommand(self.swerveSubsystem, self.driverController)
         )
-        self.driverController.x().onTrue(
-            AutoAlign(self.swerveSubsystem, self.driverController)
-        )
-
+        
         self.driverController.rightBumper().onTrue(GoToL3Tag(False, self.swerveSubsystem, self.limelight,
                                                              self.driverController))
         self.driverController.leftBumper().onTrue(GoToL3Tag(True, self.swerveSubsystem, self.limelight,

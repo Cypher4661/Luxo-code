@@ -9,7 +9,7 @@ class MyRobot(commands2.TimedCommandRobot):
     # robot
     def robotInit(self) -> None:
         self.scheduler = commands2.CommandScheduler.getInstance().enable()
-        self.container = RobotContainer()
+        self.container = RobotContainer(self.isDisabled)
         RobotContainer.container = self.container
         #wpilib.SmartDashboard.putData('Robot', self.container)
 

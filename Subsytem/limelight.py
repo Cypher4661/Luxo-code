@@ -14,10 +14,11 @@ from wpilib import SmartDashboard
 from Subsytem.LEDSubsys import ledSubsys
 from Subsytem.SwerveSubsystem import SwerveSubsystem
 
-
 class limelight(Subsystem):
-    def __init__(self, swerve: SwerveSubsystem, led:ledSubsys, getVelocity: Callable[[], float]) -> None:
+    def __init__(self, swerve: SwerveSubsystem, led:ledSubsys, getVelocity: Callable[[], float],
+                 isDisabled: Callable[[], bool]) -> None:
         super().__init__()
+        self.isDisabled = isDisabled
         self.led = led
         self.ntTable = NetworkTableInstance.getDefault().getTable(LimeLightConstants.limelight_name)
         self.field2d = wpilib._wpilib.Field2d()
@@ -45,7 +46,8 @@ class limelight(Subsystem):
             # data - x,y,z,roll,pitch,yaw,latency,tag count, tag span, avg tag distance, avg tag area
             data = self.ntTable.getNumberArray("botpose_wpiblue", [999] * 11)
             if data[0] >0:
-                return Pose2d(Translation2d(data[0], data[1]), self.swerve.getRotation2d()), data[6]
+                rotation = Rotation2d.fromDegrees(5) if self.isDisabled() else self.swerve.getRotation2d()
+                return Pose2d(Translation2d(data[0], data[1]), rotation), data[6]
         return None, 0
 
 
@@ -63,6 +65,7 @@ class limelight(Subsystem):
             if self.validCount > 2:
                 self.swerve.resetOdometry(pose)
                 self.swerve.odometer.addVisionMeasurement(pose, wpilib.Timer.getFPGATimestamp() - latency)
+                self.swerve.odometer.setVisionMeasurementStdDevs([0.3,0.3,999])
         else:
             self.led.change_color([200, 50, 50])
             self.validCount = 0

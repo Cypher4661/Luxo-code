@@ -5,56 +5,51 @@ from Constants import LimeLightConstants
 from wpimath.geometry import Pose2d
 from wpimath.kinematics import ChassisSpeeds
 import commands2
+from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 from wpilib import SmartDashboard
-
 
 class GoToPose(Command):
 
-    driveKp = 0.4
-    omegaKp = 0.1
+    driveKp = 2
+    omegaKp = 0.02
 
-    def __init__(self, pose: Pose2d | None, subsys: SwerveSubsystem,
+    def __init__(self, wantedPose: Translation2d, targetangle: Rotation2d, subsys: SwerveSubsystem,
                  controller: commands2.button.CommandXboxController):
         self.subsys = subsys
-        self.pose = pose
+        self.wantedPose = wantedPose
+        self.target = None  # Initialize as None, or set to Translation2d() if needed
+        self.targetangle = targetangle
         self.addRequirements(subsys)
         self.targetReached = False
         self.controller = controller
         super().__init__()
 
     def initialize(self):
-        self.targetReached = False if self.pose != None else True
+        self.targetReached = False if self.subsys.getPose() is not None else True
         if not self.targetReached:
-            SmartDashboard.putNumber('Go/X', self.pose.translation().x)
-            SmartDashboard.putNumber('Go/Y', self.pose.translation().y) 
-            SmartDashboard.putNumber('Go/Deg', self.pose.rotation().degrees())
-            pose = self.subsys.getPose()
-            SmartDashboard.putNumber('Go/from X', pose.translation().x)
-            SmartDashboard.putNumber('Go/from Y', pose.translation().y) 
-            SmartDashboard.putNumber('Go/from Deg', pose.rotation().degrees())
-            error = self.pose.relativeTo(pose)
-            SmartDashboard.putNumber('Go/error X', error.translation().x)
-            SmartDashboard.putNumber('Go/error Y', error.translation().y) 
-            SmartDashboard.putNumber('Go/error Deg', error.rotation().degrees())
+            pose = self.subsys.getPose()  # Get current pose from the subsystem
+
 
     def execute(self):
-        # stop if driver is driving
-        if (abs(self.controller.getLeftY()) > 0.1 or
-           abs(self.controller.getLeftX()) > 0.1 or
-           abs(self.controller.getRightX()) > 0.1):
-            self.targetReached = True
-        elif self.pose != None:
-            pose = self.subsys.getPose()
-            error = self.pose.relativeTo(pose)
-            t = error.translation()
-            x = t.x
-            y = t.y
-            deg = error.rotation().degrees() 
-            self.targetReached = abs(x) < 0.02 and abs(y) < 0.02 and abs(deg) < 3
-            self.subsys.setSpeeds(ChassisSpeeds(x*GoToPose.driveKp, y*GoToPose.driveKp, -deg*GoToPose.omegaKp), correctColor=False)
+        # Stop if driver is driving
+        if self.vision.getTagId() > 0:
+            
+            if (abs(self.controller.getLeftY()) > 0.1 or
+            abs(self.controller.getLeftX()) > 0.1):
+                self.targetReached = True
+            elif self.subsys.getPose() is not None:
+                pose = self.subsys.getPose()
+                # Corrected line: subtract the translation parts, not the whole pose
+                self.target = self.wantedPose.translation() - pose.translation()
+                self.targetangle = self.wantedPose.rotation() - self.targetangle
+                self.targetReached = abs(self.target.x) < 0.02 and abs(self.target.y) < 0.02 and abs(self.targetangle.degrees()) < 3
+                self.subsys.setSpeeds(ChassisSpeeds(self.target.x * GoToPose.driveKp,
+                                                    self.target.y * GoToPose.driveKp,
+                                                    -self.controller.getRightX()), 
+                                    correctColor=False)
 
     def isFinished(self) -> bool:
-        return self.targetReached
+        return self.targetReached or self.vision.getTagId() == 0
 
     def end(self, interrupted: bool):
-        self.subsys.drive(0,0,0)
+        self.subsys.drive(0, 0, 0)
