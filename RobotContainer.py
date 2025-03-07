@@ -1,11 +1,10 @@
-from commands2 import Command
 import wpilib
+from commands2 import Command
+from wpimath.kinematics import ChassisSpeeds
 from Commands.GoToL3Tag import GoToL3Tag
 from Commands.GoToDroL2Tag import GoToDropL2Tag
 from Commands.GoToRobotRelative import GoToRobotRelative
-from Constants import (
-    OIConstants, SystemValues
-)
+from Constants import (OIConstants, SystemValues)
 from Subsytem.SwerveSubsystem import SwerveSubsystem
 from Subsytem.LEDSubsys import ledSubsys
 from Commands.LEDCommand import ledCommand
@@ -100,7 +99,7 @@ class RobotContainer(Sendable):
         self.led_command_green = ledCommand(self.led_subsys, [0, 200, 0])
         self.led_command_blue = ledCommand(self.led_subsys, [0, 0, 200])
         self.led_command_red = ledCommand(self.led_subsys, [200, 0, 0])
-        self.led_command_purple = ledCommand(self.led_subsys, [200,0,200])
+        self.led_command_purple = ledCommand(self.led_subsys, [255,0,255])
         self.led_command_cyan = ledCommand(self.led_subsys, [0, 200, 200])
         self.led_command_yellow = ledCommand(self.led_subsys, [240, 240, 0])
 
@@ -156,7 +155,7 @@ class RobotContainer(Sendable):
         self.driverController.a().toggleOnTrue(
             SlowSwerveDriveCommand(self.swerveSubsystem, self.driverController)
         )
-        
+
         self.driverController.rightBumper().onTrue(GoToL3Tag(False, self.swerveSubsystem, self.limelight,
                                                              self.driverController))
         self.driverController.leftBumper().onTrue(GoToL3Tag(True, self.swerveSubsystem, self.limelight,
@@ -179,8 +178,8 @@ class RobotContainer(Sendable):
         self.operatorController.povDown().toggleOnTrue(self.specialCorralIntakeCommand)
         self.operatorController.povUp().toggleOnTrue(corralIntakeCommand(self.corralIntakeSubsystem, 0.2, True))
         self.operatorController.povRight().toggleOnTrue(self.l0ArmCommand)
-        self.operatorController.rightTrigger().toggleOnTrue(self.outputAlgiArmCommand)
-        self.operatorController.leftTrigger().toggleOnTrue(self.defaultAlgiArmCommand)
+        self.operatorController.rightTrigger().whileTrue(self.outputAlgiArmCommand)
+        self.operatorController.leftTrigger().whileTrue(self.defaultAlgiArmCommand)
         
 
     def getYellowLEDCommand(self):
@@ -193,20 +192,25 @@ class RobotContainer(Sendable):
         return self.algiArmSubsystem
 
     def autoL3Command(self) -> Command:
-        cmd = (GoToDropL2Tag(self.swerveSubsystem, self.limelight, self.driverController)
-               .alongWith(algiArmCommand(self.algiArmSubsystem, 20, True),
-                                algiIntakeCommand(self.algiIntakeSubsystem, -0.6, True))
-               ).withTimeout(3)
-        cmd = cmd.andThen(GoToRobotRelative(self.swerveSubsystem, 0, -1, 90,self.operatorController).withTimeout(3))
-        cmd = cmd.andThen(
-                (GoToL3Tag(True, self.swerveSubsystem, self.limelight, self.operatorController)
-                 .alongWith(corralArmCommand(self.corralArmSubsystem, SystemValues.l3ArmAngle,True)))
-                .withTimeout(3))
-        cmd = cmd.andThen(corralIntakeCommand(self.corralIntakeSubsystem,
-                                              SystemValues.outputCorralPower,
-                                              True,
-                                              self.operatorController).withTimeout(1))
-        cmd = cmd.andThen(GoToRobotRelative(self.swerveSubsystem, -0.5, 0, 0,self.operatorController).withTimeout(1))
+        
+        cmd = commands2.cmd.run(lambda: self.swerveSubsystem.setSpeeds(ChassisSpeeds(-1.2, 0, 0), False), self.swerveSubsystem).withTimeout(1.5)
+        cmd = cmd.andThen(commands2.cmd.runOnce(lambda: self.swerveSubsystem.setSpeeds(ChassisSpeeds(0, 0, 0)), self.swerveSubsystem))
+        cmd = cmd.andThen(self.outputAlgiArmCommand.withTimeout(2))
+        cmd = cmd.andThen(self.outputAlgiIntakeCommand)
+        #cmd = (GoToDropL2Tag(self.swerveSubsystem, self.limelight, self.driverController)
+        #       .alongWith(algiArmCommand(self.algiArmSubsystem, 20, True),
+        #                        algiIntakeCommand(self.algiIntakeSubsystem, -0.6, True))
+        #       ).withTimeout(3)
+        #cmd = cmd.andThen(GoToRobotRelative(self.swerveSubsystem, 0, -1, 90,self.operatorController).withTimeout(3))
+        #cmd = cmd.andThen(
+        #        (GoToL3Tag(True, self.swerveSubsystem, self.limelight, self.operatorController)
+        #         .alongWith(corralArmCommand(self.corralArmSubsystem, SystemValues.l3ArmAngle,True)))
+        #        .withTimeout(3))
+        #cmd = cmd.andThen(corralIntakeCommand(self.corralIntakeSubsystem,
+        #                                      SystemValues.outputCorralPower,
+        #                                      True,
+        #                                      self.operatorController).withTimeout(1))
+        #cmd = cmd.andThen(GoToRobotRelative(self.swerveSubsystem, -0.5, 0, 0,self.operatorController).withTimeout(1))
         return cmd
 
     def autoL1Command(self)->Command:
@@ -215,5 +219,6 @@ class RobotContainer(Sendable):
  
     def get_autonomous_command(self) -> Command:
         return self.autoL3Command()
+    
 
  

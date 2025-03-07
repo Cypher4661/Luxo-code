@@ -123,9 +123,9 @@ class LimeLightConstants:
                       (21,inchToMeter(209.49), inchToMeter(158.50),0,REEF_TAG_HEIGHT),
                       (22,inchToMeter(193.10), inchToMeter(130.17),300,REEF_TAG_HEIGHT)]
 
-    LEFT_L3_OFFSET = -0.2
-    RIGHT_L3_OFFSET = LEFT_L3_OFFSET + 0.25
-    BACK_L3_OFFSET = 0.43
+    LEFT_L3_OFFSET = -0.25
+    RIGHT_L3_OFFSET =  0.15
+    BACK_L3_OFFSET = 0.35
     def getTagTranslation(tagId : int) -> Translation2d:
         tagId = int(tagId)  # Ensure tagId is an integer
         return Translation2d(LimeLightConstants.april_tag_data[tagId - 1][1],

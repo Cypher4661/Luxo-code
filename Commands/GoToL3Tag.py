@@ -29,10 +29,11 @@ class GoToL3Tag(GoToPose):
                 self.wantedPose = LimeLightConstants.getRightL3Position(tid)
             
             # Get the angle of the tag from the vision system and set it as the target angle
-            self.targetangle = Rotation2d.fromDegrees(LimeLightConstants.getTagAngle(tid))  # Set the tag's angle
+            self.targetangle = Rotation2d.fromDegrees(LimeLightConstants.getTagAngle(tid)).rotateBy(Rotation2d.fromDegrees(180))  # Set the tag's angle
         else:
-            self.wantedPose = None
-            self.targetangle = Rotation2d(0)
+            self.wantedPose = self.swerve.getPose()
+            self.targetangle = self.swerve.getPose().rotation()
+            
         
         # Initialize the parent GoToPose with the determined wantedPose and target angle
         super().initialize()
@@ -42,8 +43,7 @@ class GoToL3Tag(GoToPose):
         super().execute()
 
     def isFinished(self) -> bool:
-        if self.vision.getTagId() == 0:
-            return True
+
         # Call the parent class's isFinished method
         return super().isFinished()
 
