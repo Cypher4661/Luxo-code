@@ -1,4 +1,6 @@
 import math
+
+import commands2
 import RobotContainer
 from wpimath import filter
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
@@ -8,7 +10,7 @@ from Constants import DriveConstants, OIConstants
 from Subsytem.SwerveModule import SwerveModule
 from navx import AHRS
 import wpilib
-from commands2 import Subsystem
+from commands2 import Subsystem, command
 
 class SwerveSubsystem(Subsystem):
     def __init__(self,) -> None:
@@ -85,6 +87,7 @@ class SwerveSubsystem(Subsystem):
         self.brake = True
         wpilib.SmartDashboard.putData('Field Pos', self.field)
         wpilib.SmartDashboard.putData('Swerve', self)
+        wpilib.SmartDashboard.putData("reset Gyro 90", commands2.cmd.runOnce((lambda: self.autoHeading(90))).ignoringDisable(True))
 
     def getVelocity(self):
         speeds = self.getCSpeed()
@@ -96,8 +99,6 @@ class SwerveSubsystem(Subsystem):
     def autoHeading(self, angle: float) -> None:
         pose = Pose2d(self.getPose().translation(), Rotation2d.fromDegrees(angle))
         self.resetOdometry(pose)
-        wpilib.SmartDashboard.putNumber('Reset Gyro to', angle)
-        wpilib.SmartDashboard.putNumber('Reset Gyro updated', self.getHeading())
         
         
 

@@ -59,7 +59,7 @@ class limelight(Subsystem):
         SmartDashboard.putNumber('Vision/count', self.validCount)
         
         if pose is not None:
-            self.led.change_color([50, 250, 50])
+            self.led.change_color([0, 250, 0])
             self.field2d.setRobotPose(pose)
             self.validCount += 1
             if self.validCount > 2:
@@ -67,7 +67,7 @@ class limelight(Subsystem):
                 self.swerve.odometer.addVisionMeasurement(pose, wpilib.Timer.getFPGATimestamp() - latency)
                 self.swerve.odometer.setVisionMeasurementStdDevs([0.3,0.3,999])
         else:
-            self.led.change_color([200, 50, 50])
+            self.led.change_color([255, 0, 255])
             self.validCount = 0
 
 

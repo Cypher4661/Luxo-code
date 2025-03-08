@@ -17,8 +17,8 @@ class SystemValues:
     outputCorralPower = -0.2
     intakeCorralArmAngle = 45.5
     specialCorralIntakeArmAngle = 73
-    pickAlgiArmAngle = 71
-    ouputAlgiArmAngle = 20
+    pickAlgiArmAngle = 60
+    ouputAlgiArmAngle = 10
 
 # class putOffsets:
 #     # 0 - L1, 1 - L2Right, 2 - L2Left, 3 - AlgeaBottom, 4 - L3Right, 5 - L3Left, 6 - AlgeaTop

@@ -27,7 +27,6 @@ class algiArmSubsys(Subsystem):
         self.absolute_encoder = wpilib.DutyCycleEncoder(self.input)
         SmartDashboard.putData(self)
         SmartDashboard.putNumber('curent angle in degree', self.get_current_degree())
-
         self.rest_encoder()
 
     def motor_config(self, motor: rev.SparkMax, direction: bool) -> rev.SparkMax:
@@ -94,6 +93,10 @@ class algiArmSubsys(Subsystem):
 
     def get_current_degree(self) -> float:
         return self.encoder.getPosition()
+    
+    def setPower(self, power: float) -> None:
+        self.motor1.set(power)
+        self.motor2.set(power)
 
     # def initSendable(self, builder: SendableBuilder) -> None:
     #     builder.addDoubleProperty(
