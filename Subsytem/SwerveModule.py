@@ -88,6 +88,7 @@ class SwerveModule(wpiutil._wpiutil.Sendable):
         config.closedLoop.setFeedbackSensor(
             ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder
         )
+        config.smartCurrentLimit(30,0,0)
         config.encoder.positionConversionFactor(ModuleConstants.angleConversionFactor)
 
         self.turningMotor.configure(

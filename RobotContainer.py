@@ -30,6 +30,7 @@ from wpilib import SmartDashboard
 from wpiutil import Sendable, SendableBuilder
 from Commands.calibrateAlgeaArm import algiArmCalibrate
 from Commands.AutoGOL3 import GoToL3TagAuto
+from Commands.joyCorallArmCommand import joycorralArmCommand
 class RobotContainer(Sendable):
 
     _isRed = False
@@ -123,6 +124,7 @@ class RobotContainer(Sendable):
             self.swerveSubsystem, self.driverController
         )
         self.led_subsys.change_color([240, 240, 0])
+        self.joycoral = joycorralArmCommand(self.corralArmSubsystem, self.operatorController)
 
         # Set Default Commands
         self.swerveSubsystem.setDefaultCommand(self.swerveCommand)
@@ -181,6 +183,7 @@ class RobotContainer(Sendable):
         self.operatorController.rightTrigger().toggleOnTrue(self.outputAlgiArmCommand)
         self.operatorController.leftStick().toggleOnTrue(algiArmCalibrate(self.algiArmSubsystem))
         self.operatorController.leftTrigger().toggleOnTrue(self.defaultAlgiArmCommand)
+        self.driverController.x(commands2.cmd.runOnce(lambda: self.corralArmSubsystem.reset_encoder()).ignoringDisable(True))
 
         
 
@@ -194,28 +197,41 @@ class RobotContainer(Sendable):
         return self.algiArmSubsystem
 
     def autoL3Command(self) -> Command:
-        cmd = commands2.cmd.run(lambda: self.swerveSubsystem.setSpeeds(ChassisSpeeds(-1.2,0 , 0), False), self.swerveSubsystem).withTimeout(1)
+
+
+
+        cmd = commands2.cmd.run(lambda: self.swerveSubsystem.setSpeedsRR(ChassisSpeeds(1.2,0 , 0)), self.swerveSubsystem).withTimeout(1)
+        print("1")
         cmd = cmd.andThen(commands2.cmd.runOnce(lambda: self.swerveSubsystem.setSpeeds(ChassisSpeeds(0, 0, 0)), self.swerveSubsystem))
-        cmd = cmd.andThen(self.outputAlgiArmCommand.withTimeout(2))
-        cmd = cmd.andThen(commands2.cmd.runOnce(lambda: algiArmCalibrate(self.algiArmSubsystem).withTimeout(1)))
-        cmd = cmd.andThen(commands2.cmd.run(lambda: self.swerveSubsystem.setSpeeds(ChassisSpeeds(0, 0, 0)), self.swerveSubsystem).withTimeout(1))
-        cmd = cmd.andThen(self.outputAlgiIntakeCommand.withTimeout(3))
-        cmd = cmd.andThen(commands2.cmd.run(lambda: self.swerveSubsystem.setSpeeds(ChassisSpeeds(0, 0, 0)), self.swerveSubsystem).withTimeout(1))
-        cmd = cmd.andThen(commands2.cmd.run(lambda: self.swerveSubsystem.setSpeeds(ChassisSpeeds(1.5 ,0 , 0), False), self.swerveSubsystem).withTimeout(0.7))
-        cmd = cmd.andThen(commands2.cmd.run(lambda: self.swerveSubsystem.setSpeeds(ChassisSpeeds(0, 0, 0)), self.swerveSubsystem).withTimeout(1))
+        '''
+        print("2")
+        cmd = cmd.andThen(self.outputAlgiArmCommand).withTimeout(0.5)
+        print("3")
+        #cmd = cmd.andThen(commands2.cmd.runOnce(lambda: algiArmCalibrate(self.algiArmSubsystem).withTimeout(1)))
+        #cmd = cmd.andThen(commands2.cmd.run(lambda: self.swerveSubsystem.setSpeeds(ChassisSpeeds(0, 0, 0)), self.swerveSubsystem).withTimeout(1))
+        cmd = cmd.andThen(algiArmCalibrate(self.algiArmSubsystem))
+        print("4")
+        cmd = cmd.andThen(commands2.cmd.run(lambda: self.swerveSubsystem.setSpeedsRR(ChassisSpeeds(0 ,- 0.5 , 0)), self.swerveSubsystem).withTimeout(0.7))
+        cmd = cmd.andThen(commands2.cmd.run(lambda: self.swerveSubsystem.setSpeeds(ChassisSpeeds(0, 0, 0)), self.swerveSubsystem).withTimeout(0.5))
         cmd = cmd.andThen(commands2.cmd.run(lambda: self.swerveSubsystem.setSpeeds(ChassisSpeeds(0 ,0 , 1), False), self.swerveSubsystem).withTimeout(1.1))
-        cmd = cmd.andThen(commands2.cmd.run(lambda: self.swerveSubsystem.setSpeeds(ChassisSpeeds(0, 0, 0)), self.swerveSubsystem).withTimeout(1.5))
-        cmd = cmd.andThen(GoToL3TagAuto(True,self.swerveSubsystem, self.limelight))
+        cmd = cmd.andThen(commands2.cmd.run(lambda: self.swerveSubsystem.setSpeeds(ChassisSpeeds(0, 0, 0)), self.swerveSubsystem).withTimeout(0.5))
+        cmd = cmd.andThen(GoToL3TagAuto(True,self.swerveSubsystem, self.limelight).withTimeout(1.5))
         cmd = cmd.andThen(commands2.cmd.runOnce(lambda: corralArmCommand(self.corralArmSubsystem, SystemValues.l3ArmAngle, True).schedule()).withTimeout(1.8))
-        cmd = cmd.andThen(commands2.cmd.runOnce(lambda: corralIntakeCommand(self.corralIntakeSubsystem, SystemValues.outputCorralPower).schedule()).withTimeout(3))
+        cmd = cmd.andThen(commands2.cmd.run(lambda: self.swerveSubsystem.setSpeeds(ChassisSpeeds(0, 0, 0)), self.swerveSubsystem).withTimeout(2))
+        cmd = cmd.andThen(commands2.cmd.runOnce(lambda: corralIntakeCommand(self.corralIntakeSubsystem, SystemValues.outputCorralPower).schedule()).withTimeout(3))'''
+        return cmd
+    
+    def autoL1Command(self) -> Command:
+        cmd = commands2.cmd.run(lambda: self.swerveSubsystem.setSpeedsRR(ChassisSpeeds(-1.2,0 , 0)), self.swerveSubsystem).withTimeout(2)
+        cmd = cmd.andThen(commands2.cmd.run(lambda: self.swerveSubsystem.setSpeedsRR(ChassisSpeeds(0 ,0 , 0)), self.swerveSubsystem).withTimeout(0.5))
+        cmd = cmd.andThen(corralIntakeCommand(
+            self.corralIntakeSubsystem, SystemValues.outputCorralPower
+        ).withTimeout(1))
         return cmd
 
-    def autoL1Command(self)->Command:
-        return l1U(self.swerveSubsystem).andThen(self.outputCorralIntakeCommand2)
-
- 
     def get_autonomous_command(self) -> Command:
-        return self.autoL3Command()
+        return self.autoL1Command()
     
 
  
+

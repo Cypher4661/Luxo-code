@@ -9,16 +9,16 @@ import wpilib
 
 class SystemValues:
     l2ArmAngle = 54
-    l3ArmAngle = 135
+    l3ArmAngle = 139
     intakeAlgiPower = 0.35
     specialCorralIntakePower = -0.35
     outputAlgiPower = -1
     intakeCorralPower = 0.5
-    outputCorralPower = -0.2
+    outputCorralPower = -0.25
     intakeCorralArmAngle = 45.5
     specialCorralIntakeArmAngle = 73
-    pickAlgiArmAngle = 60
-    ouputAlgiArmAngle = 10
+    pickAlgiArmAngle = 65
+    ouputAlgiArmAngle = 20
 
 # class putOffsets:
 #     # 0 - L1, 1 - L2Right, 2 - L2Left, 3 - AlgeaBottom, 4 - L3Right, 5 - L3Left, 6 - AlgeaTop
@@ -123,7 +123,7 @@ class LimeLightConstants:
                       (21,inchToMeter(209.49), inchToMeter(158.50),0,REEF_TAG_HEIGHT),
                       (22,inchToMeter(193.10), inchToMeter(130.17),300,REEF_TAG_HEIGHT)]
 
-    LEFT_L3_OFFSET = -0.25
+    LEFT_L3_OFFSET = -0.13
     RIGHT_L3_OFFSET =  0.15
     BACK_L3_OFFSET = 0.35
     def getTagTranslation(tagId : int) -> Translation2d:
@@ -230,7 +230,7 @@ class DriveConstants:
     kFrontLeftDriveEncoderReversed = True
     kFrontLeftDriveAbsoluteEncoderPort = 9
     kFrontLeftDriveAbsoluteEncoderReversed = False
-    kFrontLeftDriveAbsoluteEncoderOffset = 172.5
+    kFrontLeftDriveAbsoluteEncoderOffset = 8
 
     # FrontRight
     kFrontRightDriveMotorPort = 7
@@ -239,16 +239,17 @@ class DriveConstants:
     kFrontRightDriveEncoderReversed = True
     kFrontRightDriveAbsoluteEncoderPort = 10
     kFrontRightDriveAbsoluteEncoderReversed = False
-    kFrontRightDriveAbsoluteEncoderOffset = 170.4
+    kFrontRightDriveAbsoluteEncoderOffset = 10
+
 
     # BackLeft
     kBackLeftDriveMotorPort = 4
     kBackLeftTurningMotorPort = 3
     kBackLeftTurningEncoderReversed = True
-    kBackLeftDriveEncoderReversed = True
+    kBackLeftDriveEncoderReversed = False
     kBackLeftDriveAbsoluteEncoderPort = 12
     kBackLeftDriveAbsoluteEncoderReversed = False
-    kBackLeftDriveAbsoluteEncoderOffset = 142
+    kBackLeftDriveAbsoluteEncoderOffset = 36.73
 
     # BackRight
     kBackRightDriveMotorPort = 5
@@ -257,7 +258,7 @@ class DriveConstants:
     kBackRightDriveEncoderReversed = True
     kBackRightDriveAbsoluteEncoderPort = 11
     kBackRightDriveAbsoluteEncoderReversed = False
-    kBackRightDriveAbsoluteEncoderOffset = 60
+    kBackRightDriveAbsoluteEncoderOffset = -120         
 
     # Constants
     kPhysicalMaxSpeedMetersPerSecond = 4.6

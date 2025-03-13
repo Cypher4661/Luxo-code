@@ -16,7 +16,7 @@ class MyRobot(commands2.TimedCommandRobot):
         #SmartDashboard.putNumber("L3 Angle", SystemValues.l3ArmAngle)
         #SmartDashboard.putNumber("L2 Angle", SystemValues.l2ArmAngle)
         #SmartDashboard.putNumber("Intake Algi Power", SystemValues.intakeAlgiPower)
-        #SmartDashboard.putNumber(
+        #SmartDashboard.putNumber(  
         #    "Special Corral Intake Power", SystemValues.specialCorralIntakePower
         #)
         #SmartDashboard.putNumber("Output Algi Power", SystemValues.outputAlgiPower)

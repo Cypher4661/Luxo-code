@@ -88,6 +88,8 @@ class SwerveSubsystem(Subsystem):
         wpilib.SmartDashboard.putData('Field Pos', self.field)
         wpilib.SmartDashboard.putData('Swerve', self)
         wpilib.SmartDashboard.putData("reset Gyro 90", commands2.cmd.runOnce((lambda: self.autoHeading(90))).ignoringDisable(True))
+        wpilib.SmartDashboard.putData("reset Gyro -90", commands2.cmd.runOnce((lambda: self.autoHeading(-90))).ignoringDisable(True))
+
 
     def getVelocity(self):
         speeds = self.getCSpeed()
@@ -173,6 +175,10 @@ class SwerveSubsystem(Subsystem):
             speed.vx = -speed.vx
         temp = ChassisSpeeds.fromFieldRelativeSpeeds(speed, self.getRotation2d())
         moduleState = DriveConstants.kDriveKinematics.toSwerveModuleStates(temp)
+        self.setModuleStates(moduleState)
+
+    def setSpeedsRR(self, speed: ChassisSpeeds) -> None:
+        moduleState = DriveConstants.kDriveKinematics.toSwerveModuleStates(speed)
         self.setModuleStates(moduleState)
 
     def autoDrive(self, speed: ChassisSpeeds, feedforward=None) -> None:
