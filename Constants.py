@@ -72,7 +72,7 @@ class AlgiSubsys:
     limit_id = 5
     motor1_type = SparkMax.MotorType.kBrushless
     motor2_type = SparkMax.MotorType.kBrushless
-    gear_ratio = 300
+    gear_ratio = 291.304
     convertion_factor = 360 / gear_ratio
     kp = 0.02
     ki = 0.0
@@ -230,7 +230,7 @@ class DriveConstants:
     kFrontLeftDriveEncoderReversed = True
     kFrontLeftDriveAbsoluteEncoderPort = 9
     kFrontLeftDriveAbsoluteEncoderReversed = False
-    kFrontLeftDriveAbsoluteEncoderOffset = 12.7
+    kFrontLeftDriveAbsoluteEncoderOffset = 172.5
 
     # FrontRight
     kFrontRightDriveMotorPort = 7
@@ -239,7 +239,7 @@ class DriveConstants:
     kFrontRightDriveEncoderReversed = True
     kFrontRightDriveAbsoluteEncoderPort = 10
     kFrontRightDriveAbsoluteEncoderReversed = False
-    kFrontRightDriveAbsoluteEncoderOffset = 6.5
+    kFrontRightDriveAbsoluteEncoderOffset = 170.4
 
     # BackLeft
     kBackLeftDriveMotorPort = 4
@@ -248,7 +248,7 @@ class DriveConstants:
     kBackLeftDriveEncoderReversed = True
     kBackLeftDriveAbsoluteEncoderPort = 12
     kBackLeftDriveAbsoluteEncoderReversed = False
-    kBackLeftDriveAbsoluteEncoderOffset = 61.0
+    kBackLeftDriveAbsoluteEncoderOffset = 142
 
     # BackRight
     kBackRightDriveMotorPort = 5
@@ -257,7 +257,7 @@ class DriveConstants:
     kBackRightDriveEncoderReversed = True
     kBackRightDriveAbsoluteEncoderPort = 11
     kBackRightDriveAbsoluteEncoderReversed = False
-    kBackRightDriveAbsoluteEncoderOffset = -120.8
+    kBackRightDriveAbsoluteEncoderOffset = 60
 
     # Constants
     kPhysicalMaxSpeedMetersPerSecond = 4.6

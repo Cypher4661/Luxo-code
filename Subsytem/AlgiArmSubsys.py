@@ -11,10 +11,10 @@ class algiArmSubsys(Subsystem):
         super().__init__()
         # add constants
         self.motor1 = self.motor_config(
-            rev.SparkMax(AlgiSubsys.motor1_id, AlgiSubsys.motor1_type), True
+            rev.SparkMax(AlgiSubsys.motor1_id, AlgiSubsys.motor1_type), False
         )
         self.motor2 = self.motor_config(
-            rev.SparkMax(AlgiSubsys.motor2_id, AlgiSubsys.motor2_type), False
+            rev.SparkMax(AlgiSubsys.motor2_id, AlgiSubsys.motor2_type), True
         )
 
         self.motor1_controller = self.motor1.getClosedLoopController()
