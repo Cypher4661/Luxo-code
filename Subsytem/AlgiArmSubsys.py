@@ -4,6 +4,17 @@ import wpilib
 from wpiutil import SendableBuilder
 from Constants import AlgiSubsys
 from wpilib import SmartDashboard
+from phoenix6.configs.talon_fx_configs import InvertedValue, NeutralModeValue
+from phoenix6.hardware import TalonFX
+from phoenix6.controls import DutyCycleOut
+from phoenix6.configs import TalonFXConfiguration
+from commands2 import Subsystem
+import phoenix6
+from phoenix6.configs.talon_fx_configs import InvertedValue, NeutralModeValue
+from wpilib import SmartDashboard
+import wpilib
+from wpiutil import SendableBuilder
+from Constants import CorralIntake
 
 
 class algiArmSubsys(Subsystem):
@@ -98,6 +109,8 @@ class algiArmSubsys(Subsystem):
         self.motor1.set(power)
         self.motor2.set(power)
 
+    def get_motor_current(self) -> float:   
+        return self.motor1.get_stator_current().value_as_double
     # def initSendable(self, builder: SendableBuilder) -> None:
     #     builder.addDoubleProperty(
     #         "Alge Arm Angle", self.get_current_degree, lambda x: None

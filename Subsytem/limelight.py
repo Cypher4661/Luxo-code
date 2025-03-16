@@ -63,7 +63,6 @@ class limelight(Subsystem):
             self.field2d.setRobotPose(pose)
             self.validCount += 1
             if self.validCount > 2:
-                self.swerve.resetOdometry(pose)
                 self.swerve.odometer.addVisionMeasurement(pose, wpilib.Timer.getFPGATimestamp() - latency)
                 self.swerve.odometer.setVisionMeasurementStdDevs([0.3,0.3,999])
         else:

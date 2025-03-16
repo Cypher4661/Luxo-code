@@ -11,6 +11,12 @@ from Subsytem.SwerveModule import SwerveModule
 from navx import AHRS
 import wpilib
 from commands2 import Subsystem, command
+from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.controller import PPHolonomicDriveController
+from pathplannerlib.config import RobotConfig, PIDConstants
+from wpilib import DriverStation
+from Constants import DriveConstants
+
 
 class SwerveSubsystem(Subsystem):
     def __init__(self,) -> None:
@@ -89,6 +95,20 @@ class SwerveSubsystem(Subsystem):
         wpilib.SmartDashboard.putData('Swerve', self)
         wpilib.SmartDashboard.putData("reset Gyro 90", commands2.cmd.runOnce((lambda: self.autoHeading(90))).ignoringDisable(True))
         wpilib.SmartDashboard.putData("reset Gyro -90", commands2.cmd.runOnce((lambda: self.autoHeading(-90))).ignoringDisable(True))
+        config = RobotConfig.fromGUISettings()
+        AutoBuilder.configure(
+            self.getPose, # Robot pose supplier
+            self.resetOdometry, # Zero heading method
+            self.getCSpeed, # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            lambda speeds, feedforwards: self.setSpeedsRR(speeds), # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also outputs individual module feedforwards
+            PPHolonomicDriveController( # PPHolonomicController is the built in path following controller for holonomic drive trains
+                PIDConstants(0.5, 0.0, 0.0), # Translation PID constants
+                PIDConstants(0.7, 0.0, 0.0) # Rotation PID constants
+            ),
+            config, # The robot configuration
+            self.isRed, # Supplier to control path flipping based on alliance color
+            self # Reference to this subsystem to set requirements
+        )
 
 
     def getVelocity(self):
@@ -102,8 +122,6 @@ class SwerveSubsystem(Subsystem):
         pose = Pose2d(self.getPose().translation(), Rotation2d.fromDegrees(angle))
         self.resetOdometry(pose)
         
-        
-
     def getGyroHeading(self) -> float:
         angle = self.gyro.getYaw()
         return 360- angle
@@ -160,9 +178,7 @@ class SwerveSubsystem(Subsystem):
         else:
             return 0
         
-
-    def drive(
-        self, xSpeed: float, ySpeed: float, tSpeed: float) -> None:
+    def drive(self, xSpeed: float, ySpeed: float, tSpeed: float) -> None:
         x = self.getStickValue(xSpeed,DriveConstants.swerve_max_speed)
         y = self.getStickValue(ySpeed,DriveConstants.swerve_max_speed)
         t = self.getStickValue(tSpeed,DriveConstants.kPhysicalMaxAngularSpeedRadiansPerSecond)
@@ -189,6 +205,12 @@ class SwerveSubsystem(Subsystem):
         self.setModuleStates(moduleState)
 
     def getCSpeed(self) -> ChassisSpeeds:
+        """
+        Calculates and returns the chassis speeds based on the current states of the swerve modules.
+
+        Returns:
+            ChassisSpeeds: The calculated chassis speeds.
+        """
         module_states = (
             self.frontLeft.getState(),
             self.frontRight.getState(),
@@ -221,6 +243,7 @@ class SwerveSubsystem(Subsystem):
         
     def isRed(self) -> bool:
         return self._isRed
+    
     
     def initSendable(self, builder):
         builder.addDoubleProperty('Gyro', self.getGyroHeading, lambda x: None)

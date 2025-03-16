@@ -24,13 +24,16 @@ from Subsytem.AlgiArmSubsys import algiArmSubsys
 from Subsytem.AlgiIntake import algiIntake
 from Subsytem.CorralIntake import corralIntake
 from commands2 import ParallelCommandGroup, ParallelDeadlineGroup
-
 from Subsytem.limelight import limelight
 from wpilib import SmartDashboard
 from wpiutil import Sendable, SendableBuilder
 from Commands.calibrateAlgeaArm import algiArmCalibrate
 from Commands.AutoGOL3 import GoToL3TagAuto
 from Commands.joyCorallArmCommand import joycorralArmCommand
+from pathplannerlib.auto import NamedCommands
+from pathplannerlib.path import PathPlannerPath
+from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.auto import PathPlannerAuto
 class RobotContainer(Sendable):
 
     _isRed = False
@@ -60,6 +63,11 @@ class RobotContainer(Sendable):
         self.algiArmSubsystem = algiArmSubsys()
         self.limelight = limelight(self.swerveSubsystem,self.led_subsys, self.swerveSubsystem.getVelocity, self.isDisabled)
 
+        NamedCommands.registerCommand('Shoot L1', corralIntakeCommand(self.corralIntakeSubsystem, SystemValues.outputCorralPower))
+        NamedCommands.registerCommand('AlgeaOutTake', algiArmCommand(self.algiArmSubsystem, SystemValues.ouputAlgiArmAngle, True).withTimeout(0.5))
+        NamedCommands.registerCommand('AlgeaShoot',algiIntakeCommand(self.algiIntakeSubsystem, SystemValues.outputAlgiPower).withTimeout(2))
+        NamedCommands.registerCommand('L3-goto', corralArmCommand(self.corralArmSubsystem, SystemValues.l3ArmAngle, True).schedule())
+        NamedCommands.registerCommand('ShootCorral', corralIntakeCommand(self.corralIntakeSubsystem, SystemValues.outputCorralPower).withTimeout(1))
         SmartDashboard.putData('Swerve', self.swerveSubsystem)
         SmartDashboard.putData('vision', self.limelight)
 
@@ -72,9 +80,7 @@ class RobotContainer(Sendable):
         self.specialIntakeCorralCommand = corralIntakeCommand(self.corralIntakeSubsystem, SystemValues.specialCorralIntakePower)
         self.intakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, SystemValues.intakeAlgiPower)
         self.outTakeAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, SystemValues.outputAlgiPower)
-        self.intakeCorralIntakeCommand = corralIntakeCommand(
-            self.corralIntakeSubsystem, SystemValues.intakeCorralPower
-        )
+        self.intakeCorralIntakeCommand = corralIntakeCommand(self.corralIntakeSubsystem, SystemValues.intakeCorralPower)
 
         self.outputAlgiIntakeCommand = algiIntakeCommand(self.algiIntakeSubsystem, SystemValues.outputAlgiPower)
         self.outputCorralIntakeCommand = corralIntakeCommand(
@@ -143,7 +149,6 @@ class RobotContainer(Sendable):
         self.specialCorralIntakeCommand = ParallelCommandGroup(
             self.specialIntakeCorralCommand, self.specialIntakeCorralArmCommand, self.led_command_yellow
         )
-
     def configure_button_bindings(self):
 
         # Driver Controller
@@ -184,18 +189,12 @@ class RobotContainer(Sendable):
         self.operatorController.leftStick().toggleOnTrue(algiArmCalibrate(self.algiArmSubsystem))
         self.operatorController.leftTrigger().toggleOnTrue(self.defaultAlgiArmCommand)
         self.driverController.x(commands2.cmd.runOnce(lambda: self.corralArmSubsystem.reset_encoder()).ignoringDisable(True))
-
-        
-
     def getYellowLEDCommand(self):
         return self.led_command_yellow
-
     def getRedLEDCommand(self):
         return self.led_command_red
-
     def getAlgiArmSubsys(self):
         return self.algiArmSubsystem
-
     def autoL3Command(self) -> Command:
 
 
@@ -219,8 +218,7 @@ class RobotContainer(Sendable):
         cmd = cmd.andThen(commands2.cmd.runOnce(lambda: corralArmCommand(self.corralArmSubsystem, SystemValues.l3ArmAngle, True).schedule()).withTimeout(1.8))
         cmd = cmd.andThen(commands2.cmd.run(lambda: self.swerveSubsystem.setSpeeds(ChassisSpeeds(0, 0, 0)), self.swerveSubsystem).withTimeout(2))
         cmd = cmd.andThen(commands2.cmd.runOnce(lambda: corralIntakeCommand(self.corralIntakeSubsystem, SystemValues.outputCorralPower).schedule()).withTimeout(3))'''
-        return cmd
-    
+        return cmd  
     def autoL1Command(self) -> Command:
         cmd = commands2.cmd.run(lambda: self.swerveSubsystem.setSpeedsRR(ChassisSpeeds(-1.2,0 , 0)), self.swerveSubsystem).withTimeout(2)
         cmd = cmd.andThen(commands2.cmd.run(lambda: self.swerveSubsystem.setSpeedsRR(ChassisSpeeds(0 ,0 , 0)), self.swerveSubsystem).withTimeout(0.5))
@@ -228,9 +226,13 @@ class RobotContainer(Sendable):
             self.corralIntakeSubsystem, SystemValues.outputCorralPower
         ).withTimeout(1))
         return cmd
+    
+    def autoPathPlanner(self) -> Command: 
+        return PathPlannerAuto('AlgeaL3')
+
 
     def get_autonomous_command(self) -> Command:
-        return self.autoL1Command()
+        return self.autoPathPlanner()
     
 
  

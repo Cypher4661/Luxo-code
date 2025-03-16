@@ -30,7 +30,7 @@ class algiIntakeCommand(Command):
         return super().execute()
 
     def isFinished(self):
-        return not self.isDeafultCommand and self.subsys.get_motor_current() >= 29
+        return False
         return super().isFinished()
 
     def end(self, interrupted):

@@ -34,7 +34,7 @@ class corralIntakeCommand(Command):
         return super().execute()
 
     def isFinished(self):
-        return not self.isDeafultCommand and self.subsys.get_motor_current() >= 40.5
+        return not self.isDeafultCommand and self.subsys.get_motor_current() >= 30
         return super().isFinished()
 
     def end(self, interrupted):

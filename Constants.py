@@ -10,7 +10,7 @@ import wpilib
 class SystemValues:
     l2ArmAngle = 54
     l3ArmAngle = 139
-    intakeAlgiPower = 0.35
+    intakeAlgiPower = 0.8
     specialCorralIntakePower = -0.35
     outputAlgiPower = -1
     intakeCorralPower = 0.5
