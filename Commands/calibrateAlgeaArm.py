@@ -20,7 +20,7 @@ class algiArmCalibrate(Command):
         return super().execute()
 
     def isFinished(self):
-        return (self.subsys.at_limit() or motor2_id)
+        return (self.subsys.at_limit() or self.subsys.get_motor_current() >= 25)
         return super().isFinished()
 
     def end(self, interrupted):

@@ -110,7 +110,7 @@ class algiArmSubsys(Subsystem):
         self.motor2.set(power)
 
     def get_motor_current(self) -> float:   
-        return self.motor1.get_stator_current().value_as_double
+        return self.motor1.getOutputCurrent().value_as_double
     # def initSendable(self, builder: SendableBuilder) -> None:
     #     builder.addDoubleProperty(
     #         "Alge Arm Angle", self.get_current_degree, lambda x: None
