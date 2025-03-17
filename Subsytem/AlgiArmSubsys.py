@@ -86,6 +86,7 @@ class algiArmSubsys(Subsystem):
 
     def motor_to_position(self, angle: float) -> None:
         self.motor1_controller.setReference(
+            
             angle, rev.SparkLowLevel.ControlType.kPosition
         )
         self.motor2_controller.setReference(
@@ -109,8 +110,9 @@ class algiArmSubsys(Subsystem):
         self.motor1.set(power)
         self.motor2.set(power)
 
-    def get_motor_current(self) -> float:   
-        return self.motor1.getOutputCurrent().value_as_double
+    def get_motor_current(self) -> float:
+        print("algea current", self.motor2.getOutputCurrent())   
+        return self.motor1.getOutputCurrent()
     # def initSendable(self, builder: SendableBuilder) -> None:
     #     builder.addDoubleProperty(
     #         "Alge Arm Angle", self.get_current_degree, lambda x: None

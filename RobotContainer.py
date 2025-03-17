@@ -86,9 +86,7 @@ class RobotContainer(Sendable):
         self.outputCorralIntakeCommand = corralIntakeCommand(
             self.corralIntakeSubsystem, SystemValues.outputCorralPower
         )
-        self.outputCorralIntakeCommand2 = corralIntakeCommand(
-            self.corralIntakeSubsystem, -0.3
-        )
+        self.outputCorralIntakeCommand2 = corralIntakeCommand(self.corralIntakeSubsystem, -0.3)
 
         self.l3ArmCommand = corralArmCommand(self.corralArmSubsystem, SystemValues.l3ArmAngle, True)
         self.l2ArmCommand = corralArmCommand(self.corralArmSubsystem, SystemValues.l2ArmAngle, True)

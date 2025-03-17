@@ -62,8 +62,12 @@ class algiArmSubsys(Subsystem):
     def periodic(self):
         SmartDashboard.putNumber('curent angle in degree', self.get_current_degree())
         SmartDashboard.putBoolean('algi at limit', self.at_limit())
+        SmartDashboard.putNumber("0ALGEA CURRENT", lambda: self.motor1.getOutputCurrent())
         SmartDashboard.putNumber('algi abs', self.absolute_encoder.get())
         return super().periodic()
+    
+    def initSendable(self, builder):
+        builder.addDoubleProperty("ALGEA CURRENT", lambda: self.motor1.getOutputCurrent(), lambda x: None)
 
     def rest_encoder(self) -> None:
         self.encoder.setPosition(0)
