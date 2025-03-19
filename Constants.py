@@ -18,7 +18,7 @@ class SystemValues:
     intakeCorralArmAngle = 45.5
     specialCorralIntakeArmAngle = 73
     pickAlgiArmAngle = 65
-    ouputAlgiArmAngle = 20
+    ouputAlgiArmAngle = 25
 
 # class putOffsets:
 #     # 0 - L1, 1 - L2Right, 2 - L2Left, 3 - AlgeaBottom, 4 - L3Right, 5 - L3Left, 6 - AlgeaTop
@@ -177,7 +177,7 @@ class LimeLightConstants:
 
 class ModuleConstants:
     driveKS = 0.56548
-    driveKV = 3.7091
+    driveKV = 4.7091
     driveKA = 0.85702
     # Angle Motor PID Values
     angle_kp = 0.01
@@ -185,9 +185,9 @@ class ModuleConstants:
     angle_kd = 0.0
     angle_kf = 0.0
     # Drive Motor PID Values
-    drive_kp = 1
-    drive_ki = 0.0
-    drive_kd = 0.0
+    drive_kp = 1.2
+    drive_ki = 0.2
+    drive_kd = 0.03
     drive_kf = 0.25
 
     kWheelDiameterMeters = 0.095
