@@ -5,9 +5,7 @@ import math
 from wpimath.trajectory import TrapezoidProfileRadians
 from rev import SparkMax
 import wpilib
-from pathplannerlib.config import PathConstraints
-
-
+from pathplannerlib.path import PathConstraints
 class SystemValues:
     l2ArmAngle = 54
     l3ArmAngle = 139
@@ -124,9 +122,9 @@ class LimeLightConstants:
                       (21,inchToMeter(209.49), inchToMeter(158.50),0,REEF_TAG_HEIGHT),
                       (22,inchToMeter(193.10), inchToMeter(130.17),300,REEF_TAG_HEIGHT)]
 
-    LEFT_L3_OFFSET = -0.10
-    RIGHT_L3_OFFSET =  0.15
-    BACK_L3_OFFSET = 0.35
+    LEFT_L3_OFFSET = -0.33
+    RIGHT_L3_OFFSET =  0.03
+    BACK_L3_OFFSET = 0.375 + 0.103
     def getTagTranslation(tagId : int) -> Translation2d:
         tagId = int(tagId)  # Ensure tagId is an integer
         return Translation2d(LimeLightConstants.april_tag_data[tagId - 1][1],

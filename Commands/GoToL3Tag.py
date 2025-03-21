@@ -8,13 +8,15 @@ from wpilib import SmartDashboard
 
 class GoToL3Tag(GoToPose):
     def __init__(self, left: bool, swerve: SwerveSubsystem, vision: limelight,
-                 controller: commands2.button.CommandXboxController):
+                 controller: commands2.button.CommandXboxController, isAuto: bool):
         # Initialize the parent class with the default values
-        super().__init__(None, Rotation2d(0), swerve, controller)
+        super().__init__(None, Rotation2d(0), swerve, controller, isAuto)
         self.left = left
+        self.isAuto = isAuto
         
         self.swerve = swerve
         self.vision = vision
+
 
     def initialize(self):
         # Get the tag ID from the vision system

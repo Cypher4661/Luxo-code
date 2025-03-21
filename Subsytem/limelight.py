@@ -46,8 +46,10 @@ class limelight(Subsystem):
             # data - x,y,z,roll,pitch,yaw,latency,tag count, tag span, avg tag distance, avg tag area
             data = self.ntTable.getNumberArray("botpose_wpiblue", [999] * 11)
             if data[0] >0:
-                rotation = Rotation2d.fromDegrees(5) if self.isDisabled() else self.swerve.getRotation2d()
-                return Pose2d(Translation2d(data[0], data[1]), rotation), data[6]
+                #rotation = Rotation2d.fromDegrees(5) if self.isDisabled() else self.swerve.getRotation2d()
+                rotation = data[5]
+                print("ANGLE FROM VISION: ", rotation)
+                return Pose2d(Translation2d(data[0], data[1]), Rotation2d.fromDegrees(rotation)), data[6]
         return None, 0
 
 
@@ -63,10 +65,10 @@ class limelight(Subsystem):
             self.field2d.setRobotPose(pose)
             self.validCount += 1
             if self.validCount > 2:
-                self.swerve.resetOdometry(pose)
-                self.swerve.odometer.addVisionMeasurement(pose, wpilib.Timer.getFPGATimestamp() - latency)
-                self.swerve.odometer.setVisionMeasurementStdDevs([0.3,0.3,999])
+                #print("UPDATED VISION")
+                self.swerve.addVisionMeasurment(pose, wpilib.Timer.getFPGATimestamp() - 0.05) #wpilib.Timer.getFPGATimestamp() - latency
         else:
+
             self.led.change_color([255, 0, 255])
             self.validCount = 0
 

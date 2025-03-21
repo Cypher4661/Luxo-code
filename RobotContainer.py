@@ -35,11 +35,14 @@ from pathplannerlib.path import PathPlannerPath
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.auto import PathPlannerAuto
 from cscore import CameraServer as CS
+from Constants import PathPlannerConstants
+
 
 class RobotContainer(Sendable):
 
     _isRed = False
     container = None
+    constraints = PathPlannerConstants.CONSTRAINTS
 
     def __init__(self, isDisabled):
         super().__init__()
@@ -73,7 +76,9 @@ class RobotContainer(Sendable):
         NamedCommands.registerCommand('Shoot L1', corralIntakeCommand(self.corralIntakeSubsystem, SystemValues.outputCorralPower))
         NamedCommands.registerCommand('AlgeaOutTake', algiArmCommand(self.algiArmSubsystem, SystemValues.ouputAlgiArmAngle, True).withTimeout(0.5))
         NamedCommands.registerCommand('AlgeaShoot',algiIntakeCommand(self.algiIntakeSubsystem, SystemValues.outputAlgiPower).withTimeout(2))
-        NamedCommands.registerCommand('L3-goto', corralArmCommand(self.corralArmSubsystem, SystemValues.l3ArmAngle, True).schedule())
+        NamedCommands.registerCommand('GoToL3', GoToL3Tag(True, self.swerveSubsystem, self.limelight,
+                                                             self.driverController, True).withTimeout(1.5))
+        NamedCommands.registerCommand('MoveL3Arm', corralArmCommand(self.corralArmSubsystem, SystemValues.l3ArmAngle, True).withTimeout(2))
         NamedCommands.registerCommand('ShootCorral', corralIntakeCommand(self.corralIntakeSubsystem, SystemValues.outputCorralPower).withTimeout(1))
         SmartDashboard.putData('Swerve', self.swerveSubsystem)
         SmartDashboard.putData('vision', self.limelight)
@@ -169,9 +174,9 @@ class RobotContainer(Sendable):
         )
 
         self.driverController.rightBumper().onTrue(GoToL3Tag(False, self.swerveSubsystem, self.limelight,
-                                                             self.driverController))
+                                                             self.driverController, False))
         self.driverController.leftBumper().onTrue(GoToL3Tag(True, self.swerveSubsystem, self.limelight,
-                                                            self.driverController))
+                                                            self.driverController, False))
 
         #Operator Controller
 
@@ -233,15 +238,6 @@ class RobotContainer(Sendable):
         return cmd
     
     def autoPathPlanner(self) -> Command: 
-        AutoBuilder.configureHolonomic(
-        self.swerveSubsystem.getEstimatedPose,
-        self.swerveSubsystem.resetPose,
-        self.swerveSubsystem.getChassisSpeeds,
-        self.swerveSubsystem.drive,
-        self.swerveSubsystem.kinematics,
-        constraints,
-        self.swerveSubsystem
-    )
         return PathPlannerAuto('AlgeaL3')
 
 

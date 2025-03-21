@@ -89,6 +89,7 @@ class SwerveSubsystem(Subsystem):
             ),
             Pose2d(0, 0, Rotation2d(0)),
         )
+        self.odometer.setVisionMeasurementStdDevs([0.1, 0.1, 3])
         self.field = wpilib._wpilib.Field2d()
         self.brake = True
         wpilib.SmartDashboard.putData('Field Pos', self.field)
@@ -150,6 +151,9 @@ class SwerveSubsystem(Subsystem):
         )
         self.odometer.resetPosition(self.getGyroRotation2d(), module_positions, pose)
 
+    def addVisionMeasurment(self, pose: Pose2d, timestamp: float) -> None:
+        self.odometer.addVisionMeasurement(pose, timestamp)
+        
     def periodic(self) -> None:
         # print(self.getHeading())
         module_positions = (
@@ -234,6 +238,9 @@ class SwerveSubsystem(Subsystem):
         self.frontRight.setBrake(brake)
         self.backLeft.setBrake(brake)
         self.backRight.setBrake(brake)
+
+    def getKinematics(self):
+        return DriveConstants.kDriveKinematics
 
     def getBrake(self):
         return self.brake

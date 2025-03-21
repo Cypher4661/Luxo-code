@@ -7,18 +7,19 @@ from wpimath.kinematics import ChassisSpeeds
 import commands2
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
 from wpilib import SmartDashboard
-
+import math
 class GoToPose(Command):
 
-    driveKp = 0.7
-    omegaKp = 0.6
+    driveKp = 0.8
+    omegaKp = 1.8
 
     def __init__(self, wantedPose: Pose2d, targetangle: Rotation2d, subsys: SwerveSubsystem,
-                 controller: commands2.button.CommandXboxController):
+                 controller: commands2.button.CommandXboxController, isAuto: bool):
         self.subsys = subsys
         self.wantedPose = wantedPose
         self.target = None  # Initialize as None, or set to Translation2d() if needed
         self.targetangle = targetangle
+        self.isAuto = isAuto
         self.addRequirements(subsys)
         self.targetReached = False
         self.controller = controller
@@ -32,15 +33,18 @@ class GoToPose(Command):
 
     def execute(self):
         # Stop if driver is driving
-        if (abs(self.controller.getLeftY()) > 0.1 or
-        abs(self.controller.getLeftX()) > 0.1):
-            self.targetReached = True
-        elif self.subsys.getPose() is not None:
+        if not self.isAuto:
+            if (abs(self.controller.getLeftY()) > 0.1 or
+            abs(self.controller.getLeftX()) > 0.1):
+                self.targetReached = True
+
+        if self.subsys.getPose() is not None:
             pose = self.subsys.getPose()
             # Corrected line: subtract the translation parts, not the whole pose
             self.target = self.wantedPose.translation() - pose.translation()
             self.targetangle = self.wantedPose.rotation() - pose.rotation()
-            self.targetReached = abs(self.target.x) < 0.02 and abs(self.target.y) < 0.02
+            self.targetReached = abs(self.target.x) <= 0.02 and abs(self.target.y) <= 0.02
+            print("OMEGA VEL: ", math.degrees(self.targetangle.radians() * GoToPose.omegaKp ))
             self.subsys.setSpeeds(ChassisSpeeds(self.target.x * GoToPose.driveKp,
                                                 self.target.y * GoToPose.driveKp,
                                                 self.targetangle.radians() * GoToPose.omegaKp), 
