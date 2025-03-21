@@ -5,6 +5,7 @@ import math
 from wpimath.trajectory import TrapezoidProfileRadians
 from rev import SparkMax
 import wpilib
+from pathplannerlib.config import PathConstraints
 
 
 class SystemValues:
@@ -123,7 +124,7 @@ class LimeLightConstants:
                       (21,inchToMeter(209.49), inchToMeter(158.50),0,REEF_TAG_HEIGHT),
                       (22,inchToMeter(193.10), inchToMeter(130.17),300,REEF_TAG_HEIGHT)]
 
-    LEFT_L3_OFFSET = -0.13
+    LEFT_L3_OFFSET = -0.10
     RIGHT_L3_OFFSET =  0.15
     BACK_L3_OFFSET = 0.35
     def getTagTranslation(tagId : int) -> Translation2d:
@@ -180,15 +181,15 @@ class ModuleConstants:
     driveKV = 4.7091
     driveKA = 0.85702
     # Angle Motor PID Values
-    angle_kp = 0.01
+    angle_kp = 0.02
     angle_ki = 0.0
     angle_kd = 0.0
     angle_kf = 0.0
     # Drive Motor PID Values
-    drive_kp = 1.2
-    drive_ki = 0.2
-    drive_kd = 0.03
-    drive_kf = 0.25
+    drive_kp = 0.8
+    drive_ki = 0.0
+    drive_kd = 0.1
+    drive_kf = 0.2
 
     kWheelDiameterMeters = 0.095
     kDriveMotorGearRatio = 6.75
@@ -218,7 +219,7 @@ class DriveConstants:
         Translation2d(-kWheelBase / 2, -kTrackWidth / 2),
     )
 
-    swerve_max_speed = 4
+    swerve_max_speed = 3.8
 
     kTeleDriveMaxAccelerationUnitsPerSecond = 3
     kTeleDriveMaxAngularAccelerationUnitsPerSecond = 3
@@ -271,6 +272,18 @@ class DriveConstants:
     kTeleDriveMaxAccelerationUnitsPerSecond = 3
     kTeleDriveMaxAngularAccelerationUnitsPerSecond = 3
 
+class PathPlannerConstants:
+    MAX_VELOCITY = 3.0  # m/s
+    MAX_ACCELERATION = 3.0  # m/s²
+    MAX_ANGULAR_VELOCITY = 180  # deg/s
+    MAX_ANGULAR_ACCELERATION = 360  # deg/s²
+
+    CONSTRAINTS = PathConstraints(
+        MAX_VELOCITY,
+        MAX_ACCELERATION,
+        MAX_ANGULAR_VELOCITY,
+        MAX_ANGULAR_ACCELERATION
+    )
 
 class AutoConstants:
     kMaxSpeedMetersPerSecond = DriveConstants.kPhysicalMaxSpeedMetersPerSecond / 4

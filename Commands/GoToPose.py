@@ -10,8 +10,8 @@ from wpilib import SmartDashboard
 
 class GoToPose(Command):
 
-    driveKp = 0.5
-    omegaKp = 0.02
+    driveKp = 0.7
+    omegaKp = 0.6
 
     def __init__(self, wantedPose: Pose2d, targetangle: Rotation2d, subsys: SwerveSubsystem,
                  controller: commands2.button.CommandXboxController):
@@ -39,11 +39,11 @@ class GoToPose(Command):
             pose = self.subsys.getPose()
             # Corrected line: subtract the translation parts, not the whole pose
             self.target = self.wantedPose.translation() - pose.translation()
-            self.targetangle = self.wantedPose.rotation() - self.targetangle
+            self.targetangle = self.wantedPose.rotation() - pose.rotation()
             self.targetReached = abs(self.target.x) < 0.02 and abs(self.target.y) < 0.02
             self.subsys.setSpeeds(ChassisSpeeds(self.target.x * GoToPose.driveKp,
                                                 self.target.y * GoToPose.driveKp,
-                                                -self.controller.getRightX()), 
+                                                self.targetangle.radians() * GoToPose.omegaKp), 
                                 correctColor=False)
                 
 

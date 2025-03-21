@@ -34,6 +34,8 @@ from pathplannerlib.auto import NamedCommands
 from pathplannerlib.path import PathPlannerPath
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.auto import PathPlannerAuto
+from cscore import CameraServer as CS
+
 class RobotContainer(Sendable):
 
     _isRed = False
@@ -41,6 +43,11 @@ class RobotContainer(Sendable):
 
     def __init__(self, isDisabled):
         super().__init__()
+
+        
+        # Get the UsbCamera from CameraServer
+        CS.startAutomaticCapture(0).setResolution(640, 480)
+
         # Random Data
         self.led_bool_enable = True
         self.led_bool_disable = True
@@ -226,6 +233,15 @@ class RobotContainer(Sendable):
         return cmd
     
     def autoPathPlanner(self) -> Command: 
+        AutoBuilder.configureHolonomic(
+        self.swerveSubsystem.getEstimatedPose,
+        self.swerveSubsystem.resetPose,
+        self.swerveSubsystem.getChassisSpeeds,
+        self.swerveSubsystem.drive,
+        self.swerveSubsystem.kinematics,
+        constraints,
+        self.swerveSubsystem
+    )
         return PathPlannerAuto('AlgeaL3')
 
 
