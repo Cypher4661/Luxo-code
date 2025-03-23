@@ -48,7 +48,6 @@ class limelight(Subsystem):
             if data[0] >0:
                 #rotation = Rotation2d.fromDegrees(5) if self.isDisabled() else self.swerve.getRotation2d()
                 rotation = data[5]
-                print("ANGLE FROM VISION: ", rotation)
                 return Pose2d(Translation2d(data[0], data[1]), Rotation2d.fromDegrees(rotation)), data[6]
         return None, 0
 

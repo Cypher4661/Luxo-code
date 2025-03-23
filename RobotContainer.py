@@ -142,6 +142,11 @@ class RobotContainer(Sendable):
         self.led_subsys.change_color([240, 240, 0])
         self.joycoral = joycorralArmCommand(self.corralArmSubsystem, self.operatorController)
 
+        self.scoreL3Right = GoToL3Tag(False, self.swerveSubsystem, self.limelight,
+                                                             self.driverController, False)
+        self.scoreL3Left = GoToL3Tag(True, self.swerveSubsystem, self.limelight,
+                                                             self.driverController, False)
+
         # Set Default Commands
         self.swerveSubsystem.setDefaultCommand(self.swerveCommand)
         #self.algiArmSubsystem.setDefaultCommand(self.defaultAlgiArmCommand)
@@ -159,6 +164,11 @@ class RobotContainer(Sendable):
         self.specialCorralIntakeCommand = ParallelCommandGroup(
             self.specialIntakeCorralCommand, self.specialIntakeCorralArmCommand, self.led_command_yellow
         )
+
+        
+    def stopAutoAlign(self):
+        self.scoreL3Left.stopCommand()
+        self.scoreL3Right.stopCommand()
     def configure_button_bindings(self):
 
         # Driver Controller
@@ -166,17 +176,13 @@ class RobotContainer(Sendable):
         self.driverController.b().onTrue(
             commands2.cmd.runOnce(lambda: self.swerveSubsystem.zeroHeading()).ignoringDisable(True)
         )
-        self.driverController.y().onTrue(
-            commands2.cmd.runOnce(lambda: self.swerveSubsystem.check_module_angle())
-        )
         self.driverController.a().toggleOnTrue(
             SlowSwerveDriveCommand(self.swerveSubsystem, self.driverController)
         )
 
-        self.driverController.rightBumper().onTrue(GoToL3Tag(False, self.swerveSubsystem, self.limelight,
-                                                             self.driverController, False))
-        self.driverController.leftBumper().onTrue(GoToL3Tag(True, self.swerveSubsystem, self.limelight,
-                                                            self.driverController, False))
+        self.driverController.rightBumper().onTrue(self.scoreL3Right)
+        self.driverController.leftBumper().onTrue(self.scoreL3Left)
+
 
         #Operator Controller
 

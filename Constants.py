@@ -13,7 +13,7 @@ class SystemValues:
     specialCorralIntakePower = -0.35
     outputAlgiPower = -1
     intakeCorralPower = 0.5
-    outputCorralPower = -0.25
+    outputCorralPower = -0.20
     intakeCorralArmAngle = 45.5
     specialCorralIntakeArmAngle = 73
     pickAlgiArmAngle = 65
